@@ -38,6 +38,13 @@ var G = (function () {
         ALL_LETTERS: "abcdefghijklmnopqrstuvwxyz".split("")
     };
 
+    var quotes = {list:(function() {
+        return "Bitches ain't shit but hoes and tricks";
+    })(),
+    random:function () {
+        return this.list[Math.floor(Math.random() * this.list.length)];
+    }};
+
     function LetterMap() {
         var outputMap = {mapping:{}, encode:function (str){}};
 
@@ -72,8 +79,11 @@ var G = (function () {
         return outputMap;
     }
 
+
+
     return {
         constants: constants,
+        quotes:quotes,
         LetterMap: LetterMap
     };
 }());
