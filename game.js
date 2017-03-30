@@ -126,6 +126,8 @@ function updateAlphabet(mapping){
     //print out the letters of the alphabet
     for(var i = 0; i < 26; i++){
         PS.glyph(colOffset, G.constants.HEIGHT-4+rowOffset, 65+i);
+        PS.border(colOffset, G.constants.HEIGHT-4+rowOffset, 2);
+        PS.border(colOffset, G.constants.HEIGHT-4+rowOffset, {bottom:0});
         colOffset++;
         if(colOffset >= G.constants.WIDTH){
             colOffset = 0;
@@ -140,6 +142,8 @@ function updateAlphabet(mapping){
         PS.glyph(colOffset, G.constants.HEIGHT-3+rowOffset, mapping.mapping[String.fromCharCode(65+i)]);
         PS.color(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_WHITE);
         PS.glyphColor(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_BLACK);
+        PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, 2);
+        PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, {top:0});
         colOffset++;
         if(colOffset >= G.constants.WIDTH){
             colOffset = 0;
@@ -169,6 +173,7 @@ PS.init = function (system, options) {
     PS.gridColor(G.constants.BG_COL);
     PS.color(PS.ALL, PS.ALL, G.constants.PLAYAREA_COL);
     PS.border(PS.ALL, PS.ALL, 0);
+    PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
 
     PS.glyph(0,0, "A");
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
