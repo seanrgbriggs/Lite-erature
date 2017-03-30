@@ -30,7 +30,7 @@
 
 var G = (function () {
     var constants = {
-        WIDTH: 32,
+        WIDTH: 20,
         HEIGHT: 20,
         BG_COL: PS.COLOR_BLACK,
         PLAYAREA_COL: {r: 25, g: 25, b: 25},
@@ -88,6 +88,47 @@ var G = (function () {
     };
 }());
 
+//function that displays the phrase to be decoded
+//takes in string as input and writes it all, row by row
+//does not split words but writes them on the next line
+function displayString(string){
+    var words = string.split(" ");
+    PS.debug(words+"\n");
+
+    //print out each word
+    var colOffset = 0;
+    var rowOffset = 0;
+    for(var i = 0; i < words.length; i++){
+        //check if word would go past the edge of the grid and go to next line
+        if(colOffset + words[i].length > G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset++;
+        }
+        for(var j = 0; j < words[i].length; j++){
+
+            PS.glyph(colOffset, rowOffset, words[i][j]);
+            colOffset = (colOffset+1)%G.constants.WIDTH;
+            if(colOffset === 0){
+                rowOffset++;
+            }
+        }
+        //puts the empty space between words
+        colOffset = (colOffset+1)%G.constants.WIDTH;
+        if(colOffset === 0){
+            rowOffset++;
+        }
+    }
+    /*
+    var row = 0;
+    for(var i = 0; i < string.length; i++){
+        PS.glyph(i % G.constants.WIDTH, row, string[i]);
+        if((i+1) % G.constants.WIDTH === 0){
+            row++;
+        }
+    }
+    */
+}
+
 // All of the functions below MUST exist, or the engine will complain!
 
 // PS.init( system, options )
@@ -110,6 +151,11 @@ PS.init = function (system, options) {
     PS.color(PS.ALL, PS.ALL, G.constants.PLAYAREA_COL);
     PS.border(PS.ALL, PS.ALL, 0);
 
+    PS.glyph(0,0, "A");
+    PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
+    var lm = new G.LetterMap();
+
+    displayString(G.quotes.list);
 };
 
 
