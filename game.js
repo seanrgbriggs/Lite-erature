@@ -107,26 +107,16 @@ function displayString(string){
         for(var j = 0; j < words[i].length; j++){
 
             PS.glyph(colOffset, rowOffset, words[i][j]);
-            colOffset = (colOffset+1)%G.constants.WIDTH;
-            if(colOffset === 0){
-                rowOffset++;
-            }
+            colOffset++;
         }
         //puts the empty space between words
-        colOffset = (colOffset+1)%G.constants.WIDTH;
-        if(colOffset === 0){
+        colOffset++;
+        //moves to the next row if past the edge of the grid
+        if(colOffset > G.constants.WIDTH){
+            colOffset = 0;
             rowOffset++;
         }
     }
-    /*
-    var row = 0;
-    for(var i = 0; i < string.length; i++){
-        PS.glyph(i % G.constants.WIDTH, row, string[i]);
-        if((i+1) % G.constants.WIDTH === 0){
-            row++;
-        }
-    }
-    */
 }
 
 // All of the functions below MUST exist, or the engine will complain!
