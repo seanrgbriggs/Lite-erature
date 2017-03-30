@@ -120,7 +120,7 @@ function displayString(string){
 }
 
 //prints the whole alphabet with the spaces below the letters for input
-function updateAlphabet(mapping){
+function initAlphabet(mapping){
     var colOffset = 0;
     var rowOffset = 0;
     //print out the letters of the alphabet
@@ -135,11 +135,11 @@ function updateAlphabet(mapping){
         }
     }
 
-    //print out the mapping
+    //set the mapping as the data field of the bead
     colOffset = 0;
     rowOffset = 0;
     for(var i = 0; i < 26; i++){
-        PS.glyph(colOffset, G.constants.HEIGHT-3+rowOffset, mapping.mapping[String.fromCharCode(65+i)]);
+        PS.data(colOffset, G.constants.HEIGHT-3+rowOffset, mapping.mapping[String.fromCharCode(65+i)]);
         PS.color(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_WHITE);
         PS.glyphColor(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_BLACK);
         PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, 2);
@@ -180,7 +180,7 @@ PS.init = function (system, options) {
     var lm = new G.LetterMap();
     var mixed = lm.encode(G.quotes.list);
     displayString(mixed.join(""));
-    updateAlphabet(lm);
+    initAlphabet(lm);
 };
 
 
