@@ -35,11 +35,11 @@ var G = (function () {
         BG_COL: PS.COLOR_BLACK,
         PLAYAREA_COL: {r: 25, g: 25, b: 25},
 
-        ALL_LETTERS: "abcdefghijklmnopqrstuvwxyz".split("")
+        ALL_LETTERS: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
     };
 
     var quotes = {list:(function() {
-        return "Bitches ain't shit but hoes and tricks";
+        return "BITCHES AIN'T SHIT BUT HOES AND TRICKS";
     })(),
     random:function () {
         return this.list[Math.floor(Math.random() * this.list.length)];
@@ -93,7 +93,6 @@ var G = (function () {
 //does not split words but writes them on the next line
 function displayString(string){
     var words = string.split(" ");
-    PS.debug(words+"\n");
 
     //print out each word
     var colOffset = 0;
@@ -115,6 +114,36 @@ function displayString(string){
         if(colOffset > G.constants.WIDTH){
             colOffset = 0;
             rowOffset++;
+        }
+    }
+    return;
+}
+
+//prints the whole alphabet with the spaces below the letters for input
+function updateAlphabet(mapping){
+    var colOffset = 0;
+    var rowOffset = 0;
+    //print out the letters of the alphabet
+    for(var i = 0; i < 26; i++){
+        PS.glyph(colOffset, G.constants.HEIGHT-4+rowOffset, 65+i);
+        colOffset++;
+        if(colOffset >= G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+    }
+
+    //print out the mapping
+    colOffset = 0;
+    rowOffset = 0;
+    for(var i = 0; i < 26; i++){
+        PS.glyph(colOffset, G.constants.HEIGHT-3+rowOffset, mapping.mapping[String.fromCharCode(65+i)]);
+        PS.color(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_WHITE);
+        PS.glyphColor(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_BLACK);
+        colOffset++;
+        if(colOffset >= G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
         }
     }
 }
@@ -144,8 +173,9 @@ PS.init = function (system, options) {
     PS.glyph(0,0, "A");
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
     var lm = new G.LetterMap();
-
-    displayString(G.quotes.list);
+    var mixed = lm.encode(G.quotes.list);
+    displayString(mixed.join(""));
+    updateAlphabet(lm);
 };
 
 
