@@ -39,7 +39,7 @@ var G = (function () {
     };
 
     var quotes = {list:(function() {
-        return "BITCHES AIN'T SHIT BUT HOES AND TRICKS";
+        return "THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU. \n-MAYA ANGELOU";
     })(),
     random:function () {
         return this.list[Math.floor(Math.random() * this.list.length)];
@@ -100,7 +100,7 @@ function initCypher(original, cypher){
     var rowOffset = 0;
     for(var i = 0; i < cypherWords.length; i++){
         //check if word would go past the edge of the grid and go to next line
-        if(colOffset + cypherWords[i].length > G.constants.WIDTH){
+        if(colOffset + cypherWords[i].length > G.constants.WIDTH || cypherWords[i][0] === "\n"){
             colOffset = 0;
             rowOffset++;
         }
@@ -178,6 +178,7 @@ function initAlphabet(mapping){
     }
 
     //set the mapping as the data field of the bead
+    //might want to change this later but oh well
     colOffset = 0;
     rowOffset = 0;
     for(var i = 0; i < 26; i++){
@@ -186,6 +187,36 @@ function initAlphabet(mapping){
         PS.glyphColor(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_BLACK);
         PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, 2);
         PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, {top:0});
+        colOffset++;
+        if(colOffset >= G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+    }
+}
+
+//checks if the input values are correct
+function checkCorrectness(){
+    var colOffset = 0;
+    var rowOffset = G.constants.HEIGHT-3;
+    //print out the letters of the alphabet
+    for(var i = 0; i < 26; i++){
+        if(PS.glyph(colOffset, rowOffset) !== 0) {
+            //PS.debug(String.fromCharCode(PS.glyph(colOffset, rowOffset))+" "+PS.data(colOffset, rowOffset)+"\n");
+            //PS.debug(lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))+"\n");
+            //PS.debug(String.fromCharCode(PS.glyph(colOffset, rowOffset - 1))+"\n");
+            //i know this is fugly but might come back and look at it
+            if (String.fromCharCode(PS.glyph(colOffset, rowOffset - 1)) === lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))[0]) {
+                //lock it in
+                PS.color(colOffset, rowOffset, PS.COLOR_YELLOW);
+            }
+            else{
+                //remove it
+                selectedBead.x = colOffset;
+                selectedBead.y = rowOffset;
+                removeCypherLetter(PS.glyph(colOffset, rowOffset));
+            }
+        }
         colOffset++;
         if(colOffset >= G.constants.WIDTH){
             colOffset = 0;
@@ -251,6 +282,7 @@ PS.init = function (system, options) {
     var mixed = lm.encode(G.quotes.list);
     initCypher(G.quotes.list, mixed.join(""));
     initAlphabet(lm);
+    PS.glyph(G.constants.WIDTH-1, G.constants.HEIGHT-1, "?");
 };
 
 
@@ -284,6 +316,12 @@ PS.touch = function (x, y, data, options) {
     else if(selectedBead.x !== null && selectedBead.y !== null){
         selectBead(selectedBead.x, selectedBead.y);
     }
+
+    //if clicking the check button
+    if(x === G.constants.WIDTH-1 && y === G.constants.HEIGHT-1){
+        checkCorrectness();
+    }
+
 };
 
 
