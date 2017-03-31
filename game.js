@@ -123,9 +123,42 @@ function initCypher(original, cypher){
 //update cypher with the new input data
 function updateCypher(letter){
     //place the new letter in the new spot
-    PS.debug(letter);
     PS.glyph(selectedBead.x, selectedBead.y, letter);
+
+    //update all the occurrences of that letter in the cyphered string
+    for(var row = 0; row < 5; row++){
+        for(var col = 0; col < G.constants.WIDTH; col++){
+            if(PS.color(col, row) !== PS.COLOR_YELLOW &&
+                PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y-1)){
+                //PS.debug(col+","+row+"\n");
+                PS.glyph(col, row, PS.glyph(selectedBead.x, selectedBead.y));
+                PS.color(col, row, PS.COLOR_YELLOW);
+                PS.glyphColor(col, row, PS.COLOR_BLACK);
+            }
+        }
+    }
+
+    //deselect the bead after the operation is done
     selectBead(selectedBead.x, selectedBead.y);
+}
+
+function removeCypherLetter(letter){
+    //remove all occurences of the letter in the cyphered string
+    for(var row = 0; row < 5; row++){
+        for(var col = 0; col < G.constants.WIDTH; col++){
+            if(PS.color(col, row) === PS.COLOR_YELLOW &&
+                PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y)){
+                PS.glyph(col, row, lm.encode(PS.data(col, row))[0]);
+                PS.color(col, row, G.constants.PLAYAREA_COL);
+                PS.glyphColor(col, row, PS.COLOR_WHITE);
+            }
+        }
+    }
+
+    //remove the letter from the selected space and set the selected space to null
+    PS.glyph(selectedBead.x,  selectedBead.y, 0);
+    selectedBead.x = null;
+    selectedBead.y = null;
 }
 
 //prints the whole alphabet with the spaces below the letters for input
@@ -203,6 +236,8 @@ function selectBead(x, y){
 // the initial dimensions you want (32 x 32 maximum)
 // Do this FIRST to avoid problems!
 
+var lm = new G.LetterMap();
+
 PS.init = function (system, options) {
 
     PS.gridSize(G.constants.WIDTH, G.constants.HEIGHT);
@@ -213,7 +248,6 @@ PS.init = function (system, options) {
 
     PS.glyph(0,0, "A");
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
-    var lm = new G.LetterMap();
     var mixed = lm.encode(G.quotes.list);
     initCypher(G.quotes.list, mixed.join(""));
     initAlphabet(lm);
@@ -237,7 +271,14 @@ PS.touch = function (x, y, data, options) {
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
     if(PS.color(x, y) === PS.COLOR_WHITE) {
-        selectBead(x, y);
+        if(PS.glyph(x,y) !== 0){
+            selectedBead.x = x;
+            selectedBead.y = y;
+            removeCypherLetter(PS.glyph(x, y));
+        }
+        else {
+            selectBead(x, y);
+        }
     }
     //else deselect the bead if there is one selected and clicking on an non input bead
     else if(selectedBead.x !== null && selectedBead.y !== null){
