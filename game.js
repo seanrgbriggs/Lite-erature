@@ -91,21 +91,22 @@ var G = (function () {
 //function that displays the phrase to be decoded
 //takes in string as input and writes it all, row by row
 //does not split words but writes them on the next line
-function displayString(string){
-    var words = string.split(" ");
+function initCypher(original, cypher){
+    var originalWords = original.split(" ");
+    var cypherWords = cypher.split(" ");
 
     //print out each word
     var colOffset = 0;
     var rowOffset = 0;
-    for(var i = 0; i < words.length; i++){
+    for(var i = 0; i < cypherWords.length; i++){
         //check if word would go past the edge of the grid and go to next line
-        if(colOffset + words[i].length > G.constants.WIDTH){
+        if(colOffset + cypherWords[i].length > G.constants.WIDTH){
             colOffset = 0;
             rowOffset++;
         }
-        for(var j = 0; j < words[i].length; j++){
-
-            PS.glyph(colOffset, rowOffset, words[i][j]);
+        for(var j = 0; j < cypherWords[i].length; j++){
+            PS.glyph(colOffset, rowOffset, cypherWords[i][j]);
+            PS.data(colOffset, rowOffset, originalWords[i][j]);
             colOffset++;
         }
         //puts the empty space between words
@@ -117,6 +118,14 @@ function displayString(string){
         }
     }
     return;
+}
+
+//update cypher with the new input data
+function updateCypher(letter){
+    //place the new letter in the new spot
+    PS.debug(letter);
+    PS.glyph(selectedBead.x, selectedBead.y, letter);
+    selectBead(selectedBead.x, selectedBead.y);
 }
 
 //prints the whole alphabet with the spaces below the letters for input
@@ -152,6 +161,33 @@ function initAlphabet(mapping){
     }
 }
 
+var selectedBead = {
+    x: null,
+    y: null
+};
+
+//function to select an empty bead
+function selectBead(x, y){
+
+    //deselect the previous selected bead
+    if(selectedBead.x !== null && selectedBead.y !== null) {
+        PS.border(selectedBead.x, selectedBead.y, 2);
+        PS.border(selectedBead.x, selectedBead.y, {top: 0});
+        PS.borderColor(selectedBead.x, selectedBead.y, PS.COLOR_BLACK);
+    }
+    //select the new bead if its not the same one
+    if(selectedBead.x !== x || selectedBead.y !== y) {
+        PS.border(x, y, 4);
+        PS.borderColor(x, y, PS.COLOR_RED);
+        selectedBead.x = x;
+        selectedBead.y = y;
+    }
+    else{
+        selectedBead.x = null;
+        selectedBead.y = null;
+    }
+}
+
 // All of the functions below MUST exist, or the engine will complain!
 
 // PS.init( system, options )
@@ -179,7 +215,7 @@ PS.init = function (system, options) {
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
     var lm = new G.LetterMap();
     var mixed = lm.encode(G.quotes.list);
-    displayString(mixed.join(""));
+    initCypher(G.quotes.list, mixed.join(""));
     initAlphabet(lm);
 };
 
@@ -199,6 +235,14 @@ PS.touch = function (x, y, data, options) {
 
 
     // Add code here for mouse clicks/touches over a bead
+    //if this is one of the empty beads
+    if(PS.color(x, y) === PS.COLOR_WHITE) {
+        selectBead(x, y);
+    }
+    //else deselect the bead if there is one selected and clicking on an non input bead
+    else if(selectedBead.x !== null && selectedBead.y !== null){
+        selectBead(selectedBead.x, selectedBead.y);
+    }
 };
 
 
@@ -273,7 +317,11 @@ PS.keyDown = function (key, shift, ctrl, options) {
     //	PS.debug( "DOWN: key = " + key + ", shift = " + shift + "\n" );
 
     // Add code here for when a key is pressed
-    // play/pause when spacebar is pressed
+    //if there is a selected bead, set it in the selected
+    //currently does not check if the key is actually a letter
+    if(selectedBead.x !== null && selectedBead.y !== null){
+        updateCypher(String.fromCharCode(key).toUpperCase());
+    }
 };
 
 // PS.keyUp ( key, shift, ctrl, options )
