@@ -91,6 +91,7 @@ var G = (function () {
 //function that displays the phrase to be decoded
 //takes in string as input and writes it all, row by row
 //does not split words but writes them on the next line
+//TODO: can probably be combined with the init alphabet in order to gray out unused letters
 function initCypher(original, cypher){
     var originalWords = original.split(" ");
     var cypherWords = cypher.split(" ");
@@ -126,14 +127,21 @@ function updateCypher(letter){
     PS.glyph(selectedBead.x, selectedBead.y, letter);
 
     //update all the occurrences of that letter in the cyphered string
+    var letter;
+    var encoded;
+    //TODO fix so that it goes until the end of the string and not just 5 rows
     for(var row = 0; row < 5; row++){
         for(var col = 0; col < G.constants.WIDTH; col++){
-            if(PS.color(col, row) !== PS.COLOR_YELLOW &&
-                PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y-1)){
-                //PS.debug(col+","+row+"\n");
-                PS.glyph(col, row, PS.glyph(selectedBead.x, selectedBead.y));
-                PS.color(col, row, PS.COLOR_YELLOW);
-                PS.glyphColor(col, row, PS.COLOR_BLACK);
+            // if there is a glyph at that col, row
+            if(PS.glyph(col, row) !== 0) {
+                letter = String.fromCharCode(PS.glyph(selectedBead.x, selectedBead.y-1));
+                encoded = lm.encode(PS.data(col, row))[0];
+                //if the letter corresponds to the encoded letter
+                if(letter === encoded) {
+                    PS.glyph(col, row, PS.glyph(selectedBead.x, selectedBead.y));
+                    PS.color(col, row, PS.COLOR_YELLOW);
+                    PS.glyphColor(col, row, PS.COLOR_BLACK);
+                }
             }
         }
     }
@@ -142,23 +150,25 @@ function updateCypher(letter){
     selectBead(selectedBead.x, selectedBead.y);
 }
 
-function removeCypherLetter(letter){
+function removeCypherLetter(){
     //remove all occurences of the letter in the cyphered string
     for(var row = 0; row < 5; row++){
         for(var col = 0; col < G.constants.WIDTH; col++){
-            if(PS.color(col, row) === PS.COLOR_YELLOW &&
-                PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y)){
+            if(PS.color(col, row) === PS.COLOR_YELLOW){
+                //compare the values so that only that one is removed
+                if(true){
+                //PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y));
                 PS.glyph(col, row, lm.encode(PS.data(col, row))[0]);
                 PS.color(col, row, G.constants.PLAYAREA_COL);
                 PS.glyphColor(col, row, PS.COLOR_WHITE);
+                }
             }
         }
     }
 
-    //remove the letter from the selected space and set the selected space to null
+    //remove the letter from the selected space and deselect the selected space
     PS.glyph(selectedBead.x,  selectedBead.y, 0);
-    selectedBead.x = null;
-    selectedBead.y = null;
+    //selectBead(selectedBead.x, selectedBead.y);
 }
 
 //prints the whole alphabet with the spaces below the letters for input
@@ -196,6 +206,9 @@ function initAlphabet(mapping){
 }
 
 //checks if the input values are correct
+//TODO: fix it so that it uses selected square to do the remove letter and stuff
+//TODO: remove the locking in function
+//TODO: don't remove letters that are wrong, but rather signify that they are wrong
 function checkCorrectness(){
     var colOffset = 0;
     var rowOffset = G.constants.HEIGHT-3;
@@ -303,14 +316,7 @@ PS.touch = function (x, y, data, options) {
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
     if(PS.color(x, y) === PS.COLOR_WHITE) {
-        if(PS.glyph(x,y) !== 0){
-            selectedBead.x = x;
-            selectedBead.y = y;
-            removeCypherLetter(PS.glyph(x, y));
-        }
-        else {
-            selectBead(x, y);
-        }
+        selectBead(x, y);
     }
     //else deselect the bead if there is one selected and clicking on an non input bead
     else if(selectedBead.x !== null && selectedBead.y !== null){
@@ -321,6 +327,7 @@ PS.touch = function (x, y, data, options) {
     if(x === G.constants.WIDTH-1 && y === G.constants.HEIGHT-1){
         checkCorrectness();
     }
+
 
 };
 
@@ -393,13 +400,21 @@ PS.exitGrid = function (options) {
 
 PS.keyDown = function (key, shift, ctrl, options) {
     // Uncomment the following line to inspect parameters
-    //	PS.debug( "DOWN: key = " + key + ", shift = " + shift + "\n" );
+    // PS.debug( "DOWN: key = " + key + ", shift = " + shift + "\n" );
 
     // Add code here for when a key is pressed
     //if there is a selected bead, set it in the selected
     //currently does not check if the key is actually a letter
     if(selectedBead.x !== null && selectedBead.y !== null){
-        updateCypher(String.fromCharCode(key).toUpperCase());
+        //if backspace is pressed
+        if(key === 8 && selectedBead.x !== null){
+            //remove the letter and deselect the bead
+            removeCypherLetter(PS.glyph(selectedBead.x, selectedBead.y));
+            selectBead(selectedBead.x, selectedBead.y);
+        }
+        else {
+            updateCypher(String.fromCharCode(key).toUpperCase());
+        }
     }
 };
 
