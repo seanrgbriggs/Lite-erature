@@ -150,17 +150,22 @@ function updateCypher(letter){
     selectBead(selectedBead.x, selectedBead.y);
 }
 
+//TODO: make so that it goes until the end of the string and not just 5 rows
 function removeCypherLetter(){
     //remove all occurences of the letter in the cyphered string
+    var letter;
+    var encoded;
     for(var row = 0; row < 5; row++){
         for(var col = 0; col < G.constants.WIDTH; col++){
             if(PS.color(col, row) === PS.COLOR_YELLOW){
                 //compare the values so that only that one is removed
-                if(true){
-                //PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y));
-                PS.glyph(col, row, lm.encode(PS.data(col, row))[0]);
-                PS.color(col, row, G.constants.PLAYAREA_COL);
-                PS.glyphColor(col, row, PS.COLOR_WHITE);
+                letter = String.fromCharCode(PS.glyph(selectedBead.x, selectedBead.y-1));
+                encoded = lm.encode(PS.data(col, row))[0];
+                if(letter === encoded){
+                    //PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y));
+                    PS.glyph(col, row, lm.encode(PS.data(col, row))[0]);
+                    PS.color(col, row, G.constants.PLAYAREA_COL);
+                    PS.glyphColor(col, row, PS.COLOR_WHITE);
                 }
             }
         }
