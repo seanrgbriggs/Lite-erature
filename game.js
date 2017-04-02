@@ -88,6 +88,50 @@ var G = (function () {
     };
 }());
 
+//initializes the cypher to be solved
+//letters above will be the cyphered text
+//black spaces below will contain the correct letter in their data field
+function initCypher2(original){
+    //create the cyphered string from the original
+    var cyphered = lm.encode(original).join("");
+
+    //split the strings into their individual words
+    original = original.split(" ");
+    cyphered = cyphered.split(" ");
+
+    var colOffset = 0;
+    var rowOffset = 0;
+    //go through every word in the string
+    for(var i = 0; i < cyphered.length; i++){
+        //move word to next line if it won't fit on current line
+        if(colOffset + cyphered[i].length > G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
+        //go through every letter in each word
+        for(var j = 0; j < cyphered[i].length; j++){
+            //print every letter in the cyphered word
+            PS.glyph(colOffset, rowOffset, cyphered[i][j]);
+
+            //make the beads below them white, with the real letter in the data of the bead
+            PS.color(colOffset, rowOffset+1, PS.COLOR_WHITE);
+            PS.glyphColor(colOffset, rowOffset+1, PS.COLOR_BLACK);
+            PS.border(colOffset, rowOffset+1, 2);
+
+            //increase the offset
+            colOffset++;
+        }
+
+        //add the space after words
+        colOffset++;
+        if(colOffset > G.constants.WIDTH-1){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+    }
+}
+
 //function that displays the phrase to be decoded
 //takes in string as input and writes it all, row by row
 //does not split words but writes them on the next line
@@ -105,13 +149,16 @@ function initCypher(original, cypher){
             colOffset = 0;
             rowOffset++;
         }
+        //print every letter of the word
         for(var j = 0; j < cypherWords[i].length; j++){
             PS.glyph(colOffset, rowOffset, cypherWords[i][j]);
             PS.data(colOffset, rowOffset, originalWords[i][j]);
             colOffset++;
         }
-        //puts the empty space between words
-        colOffset++;
+        //puts the empty space between words, as long as it's not the first column
+        if(colOffset != 0) {
+            colOffset++;
+        }
         //moves to the next row if past the edge of the grid
         if(colOffset > G.constants.WIDTH){
             colOffset = 0;
@@ -126,6 +173,9 @@ function updateCypher(letter){
     //place the new letter in the new spot
     PS.glyph(selectedBead.x, selectedBead.y, letter);
 
+    //go through the entire cypher
+    
+    /*
     //update all the occurrences of that letter in the cyphered string
     var letter;
     var encoded;
@@ -145,7 +195,7 @@ function updateCypher(letter){
             }
         }
     }
-
+    */
     //deselect the bead after the operation is done
     selectBead(selectedBead.x, selectedBead.y);
 }
@@ -182,22 +232,11 @@ function initAlphabet(mapping){
     var rowOffset = 0;
     //print out the letters of the alphabet
     for(var i = 0; i < 26; i++){
+        //puts the alphabet at the bottom
         PS.glyph(colOffset, G.constants.HEIGHT-4+rowOffset, 65+i);
         PS.border(colOffset, G.constants.HEIGHT-4+rowOffset, 2);
         PS.border(colOffset, G.constants.HEIGHT-4+rowOffset, {bottom:0});
-        colOffset++;
-        if(colOffset >= G.constants.WIDTH){
-            colOffset = 0;
-            rowOffset += 2;
-        }
-    }
-
-    //set the mapping as the data field of the bead
-    //might want to change this later but oh well
-    colOffset = 0;
-    rowOffset = 0;
-    for(var i = 0; i < 26; i++){
-        PS.data(colOffset, G.constants.HEIGHT-3+rowOffset, mapping.mapping[String.fromCharCode(65+i)]);
+        //makes the white squares below the alphabet
         PS.color(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_WHITE);
         PS.glyphColor(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_BLACK);
         PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, 2);
@@ -243,10 +282,6 @@ function checkCorrectness(){
     }
 }
 
-var selectedBead = {
-    x: null,
-    y: null
-};
 
 //function to select an empty bead
 function selectBead(x, y){
@@ -254,7 +289,6 @@ function selectBead(x, y){
     //deselect the previous selected bead
     if(selectedBead.x !== null && selectedBead.y !== null) {
         PS.border(selectedBead.x, selectedBead.y, 2);
-        PS.border(selectedBead.x, selectedBead.y, {top: 0});
         PS.borderColor(selectedBead.x, selectedBead.y, PS.COLOR_BLACK);
     }
     //select the new bead if its not the same one
@@ -286,21 +320,24 @@ function selectBead(x, y){
 // Do this FIRST to avoid problems!
 
 var lm = new G.LetterMap();
+var selectedBead = {
+    x: null,
+    y: null
+};
 
 PS.init = function (system, options) {
-
+    //setup the grid
     PS.gridSize(G.constants.WIDTH, G.constants.HEIGHT);
     PS.gridColor(G.constants.BG_COL);
     PS.color(PS.ALL, PS.ALL, G.constants.PLAYAREA_COL);
     PS.border(PS.ALL, PS.ALL, 0);
     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
-
-    PS.glyph(0,0, "A");
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
-    var mixed = lm.encode(G.quotes.list);
-    initCypher(G.quotes.list, mixed.join(""));
-    initAlphabet(lm);
-    PS.glyph(G.constants.WIDTH-1, G.constants.HEIGHT-1, "?");
+    //initialize the cyphered text
+    initCypher2(G.quotes.list);
+    //initCypher(G.quotes.list, mixed.join(""));
+    //initAlphabet(lm);
+    //PS.glyph(G.constants.WIDTH-1, G.constants.HEIGHT-1, "?");
 };
 
 
@@ -409,7 +446,7 @@ PS.keyDown = function (key, shift, ctrl, options) {
 
     // Add code here for when a key is pressed
     //if there is a selected bead, set it in the selected
-    //currently does not check if the key is actually a letter
+    //TODO: currently does not check if the key is actually a letter
     if(selectedBead.x !== null && selectedBead.y !== null){
         //if backspace is pressed
         if(key === 8 && selectedBead.x !== null){
