@@ -91,12 +91,12 @@ var G = (function () {
 //initializes the cypher to be solved
 //letters above will be the cyphered text
 //black spaces below will contain the correct letter in their data field
-function initCypher2(original){
+function initCypher2(){
     //create the cyphered string from the original
     var cyphered = lm.encode(original).join("");
 
     //split the strings into their individual words
-    original = original.split(" ");
+    var originalWords = original.split(" ");
     cyphered = cyphered.split(" ");
 
     var colOffset = 0;
@@ -118,6 +118,7 @@ function initCypher2(original){
             PS.color(colOffset, rowOffset+1, PS.COLOR_WHITE);
             PS.glyphColor(colOffset, rowOffset+1, PS.COLOR_BLACK);
             PS.border(colOffset, rowOffset+1, 2);
+            PS.data(colOffset, rowOffset+1, originalWords[i][j]);
 
             //increase the offset
             colOffset++;
@@ -172,9 +173,37 @@ function initCypher(original, cypher){
 function updateCypher(letter){
     //place the new letter in the new spot
     PS.glyph(selectedBead.x, selectedBead.y, letter);
+    var originalWords = original.split(" ");
+    var cypherLetter = PS.glyph(selectedBead.x, selectedBead.y-1);
 
     //go through the entire cypher
-    
+    var colOffset = 0;
+    var rowOffset = 1;
+    for(var i = 0; i < originalWords.length; i++){
+        //move word to next line if it won't fit on current line
+        if(colOffset + originalWords[i].length > G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
+        for(var j = 0; j < originalWords[i].length; j++){
+            //PS.glyph(colOffset, rowOffset, PS.data(colOffset, rowOffset));
+            if(PS.glyph(colOffset, rowOffset-1) === cypherLetter){
+                PS.glyph(colOffset, rowOffset, letter);
+            }
+
+            //increase the offset
+            colOffset++;
+        }
+
+        //add the space after words
+        colOffset++;
+        if(colOffset > G.constants.WIDTH-1){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
+    }
     /*
     //update all the occurrences of that letter in the cyphered string
     var letter;
@@ -319,6 +348,7 @@ function selectBead(x, y){
 // the initial dimensions you want (32 x 32 maximum)
 // Do this FIRST to avoid problems!
 
+var original;
 var lm = new G.LetterMap();
 var selectedBead = {
     x: null,
@@ -334,7 +364,8 @@ PS.init = function (system, options) {
     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
     //initialize the cyphered text
-    initCypher2(G.quotes.list);
+    original = G.quotes.list;
+    initCypher2();
     //initCypher(G.quotes.list, mixed.join(""));
     //initAlphabet(lm);
     //PS.glyph(G.constants.WIDTH-1, G.constants.HEIGHT-1, "?");
