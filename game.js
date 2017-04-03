@@ -102,23 +102,28 @@ function initCypher2(){
     var colOffset = 0;
     var rowOffset = 0;
     //go through every word in the string
-    for(var i = 0; i < cyphered.length; i++){
+    for(var i = 0; i < originalWords.length; i++){
         //move word to next line if it won't fit on current line
-        if(colOffset + cyphered[i].length > G.constants.WIDTH){
+        if(colOffset + originalWords[i].length > G.constants.WIDTH){
             colOffset = 0;
             rowOffset += 2;
         }
 
         //go through every letter in each word
-        for(var j = 0; j < cyphered[i].length; j++){
+        for(var j = 0; j < originalWords[i].length; j++){
             //print every letter in the cyphered word
             PS.glyph(colOffset, rowOffset, cyphered[i][j]);
 
-            //make the beads below them white, with the real letter in the data of the bead
-            PS.color(colOffset, rowOffset+1, PS.COLOR_WHITE);
-            PS.glyphColor(colOffset, rowOffset+1, PS.COLOR_BLACK);
-            PS.border(colOffset, rowOffset+1, 2);
-            PS.data(colOffset, rowOffset+1, originalWords[i][j]);
+            //make the beads below them white, with the real letter in the data of the bead, only if letters
+            if(originalWords[i][j] >= "A" && originalWords <= "Z") {
+                PS.color(colOffset, rowOffset + 1, PS.COLOR_WHITE);
+                PS.glyphColor(colOffset, rowOffset + 1, PS.COLOR_BLACK);
+                PS.border(colOffset, rowOffset + 1, 2);
+                PS.data(colOffset, rowOffset + 1, originalWords[i][j]);
+            }
+            else{
+                PS.glyph(colOffset, rowOffset+1, cyphered[i][j]);
+            }
 
             //increase the offset
             colOffset++;
@@ -131,42 +136,6 @@ function initCypher2(){
             rowOffset += 2;
         }
     }
-}
-
-//function that displays the phrase to be decoded
-//takes in string as input and writes it all, row by row
-//does not split words but writes them on the next line
-//TODO: can probably be combined with the init alphabet in order to gray out unused letters
-function initCypher(original, cypher){
-    var originalWords = original.split(" ");
-    var cypherWords = cypher.split(" ");
-
-    //print out each word
-    var colOffset = 0;
-    var rowOffset = 0;
-    for(var i = 0; i < cypherWords.length; i++){
-        //check if word would go past the edge of the grid and go to next line
-        if(colOffset + cypherWords[i].length > G.constants.WIDTH || cypherWords[i][0] === "\n"){
-            colOffset = 0;
-            rowOffset++;
-        }
-        //print every letter of the word
-        for(var j = 0; j < cypherWords[i].length; j++){
-            PS.glyph(colOffset, rowOffset, cypherWords[i][j]);
-            PS.data(colOffset, rowOffset, originalWords[i][j]);
-            colOffset++;
-        }
-        //puts the empty space between words, as long as it's not the first column
-        if(colOffset != 0) {
-            colOffset++;
-        }
-        //moves to the next row if past the edge of the grid
-        if(colOffset > G.constants.WIDTH){
-            colOffset = 0;
-            rowOffset++;
-        }
-    }
-    return;
 }
 
 //update cypher with the new input data
@@ -204,78 +173,47 @@ function updateCypher(letter){
         }
 
     }
-    /*
-    //update all the occurrences of that letter in the cyphered string
-    var letter;
-    var encoded;
-    //TODO fix so that it goes until the end of the string and not just 5 rows
-    for(var row = 0; row < 5; row++){
-        for(var col = 0; col < G.constants.WIDTH; col++){
-            // if there is a glyph at that col, row
-            if(PS.glyph(col, row) !== 0) {
-                letter = String.fromCharCode(PS.glyph(selectedBead.x, selectedBead.y-1));
-                encoded = lm.encode(PS.data(col, row))[0];
-                //if the letter corresponds to the encoded letter
-                if(letter === encoded) {
-                    PS.glyph(col, row, PS.glyph(selectedBead.x, selectedBead.y));
-                    PS.color(col, row, PS.COLOR_YELLOW);
-                    PS.glyphColor(col, row, PS.COLOR_BLACK);
-                }
-            }
-        }
-    }
-    */
     //deselect the bead after the operation is done
     selectBead(selectedBead.x, selectedBead.y);
 }
 
-//TODO: make so that it goes until the end of the string and not just 5 rows
+//removes the letter in the selected space from the rest of the cypher
 function removeCypherLetter(){
-    //remove all occurences of the letter in the cyphered string
-    var letter;
-    var encoded;
-    for(var row = 0; row < 5; row++){
-        for(var col = 0; col < G.constants.WIDTH; col++){
-            if(PS.color(col, row) === PS.COLOR_YELLOW){
-                //compare the values so that only that one is removed
-                letter = String.fromCharCode(PS.glyph(selectedBead.x, selectedBead.y-1));
-                encoded = lm.encode(PS.data(col, row))[0];
-                if(letter === encoded){
-                    //PS.glyph(col, row) === PS.glyph(selectedBead.x, selectedBead.y));
-                    PS.glyph(col, row, lm.encode(PS.data(col, row))[0]);
-                    PS.color(col, row, G.constants.PLAYAREA_COL);
-                    PS.glyphColor(col, row, PS.COLOR_WHITE);
-                }
-            }
-        }
-    }
 
-    //remove the letter from the selected space and deselect the selected space
-    PS.glyph(selectedBead.x,  selectedBead.y, 0);
-    //selectBead(selectedBead.x, selectedBead.y);
-}
+    var originalWords = original.split(" ");
+    var letter = PS.glyph(selectedBead.x, selectedBead.y);
 
-//prints the whole alphabet with the spaces below the letters for input
-function initAlphabet(mapping){
+    //go through the entire cypher
     var colOffset = 0;
-    var rowOffset = 0;
-    //print out the letters of the alphabet
-    for(var i = 0; i < 26; i++){
-        //puts the alphabet at the bottom
-        PS.glyph(colOffset, G.constants.HEIGHT-4+rowOffset, 65+i);
-        PS.border(colOffset, G.constants.HEIGHT-4+rowOffset, 2);
-        PS.border(colOffset, G.constants.HEIGHT-4+rowOffset, {bottom:0});
-        //makes the white squares below the alphabet
-        PS.color(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_WHITE);
-        PS.glyphColor(colOffset, G.constants.HEIGHT-3+rowOffset, PS.COLOR_BLACK);
-        PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, 2);
-        PS.border(colOffset, G.constants.HEIGHT-3+rowOffset, {top:0});
-        colOffset++;
-        if(colOffset >= G.constants.WIDTH){
+    var rowOffset = 1;
+    for(var i = 0; i < originalWords.length; i++){
+
+        //move word to next line if it won't fit on current line
+        if(colOffset + originalWords[i].length > G.constants.WIDTH){
             colOffset = 0;
             rowOffset += 2;
         }
+
+        for(var j = 0; j < originalWords[i].length; j++){
+            //PS.glyph(colOffset, rowOffset, PS.data(colOffset, rowOffset));
+            if(PS.glyph(colOffset, rowOffset) === letter){
+                PS.glyph(colOffset, rowOffset, 0);
+            }
+
+            //increase the offset
+            colOffset++;
+        }
+
+        //add the space after words
+        colOffset++;
+        if(colOffset > G.constants.WIDTH-1){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
     }
+    //deselect the bead after the operation is done
+    selectBead(selectedBead.x, selectedBead.y);
 }
 
 //checks if the input values are correct
