@@ -33,6 +33,7 @@ var G = (function () {
         WIDTH: 20,
         HEIGHT: 20,
         BG_COL: PS.COLOR_BLACK,
+        WRONG_COL: 255*65536+100*256+100,
         PLAYAREA_COL: {r: 25, g: 25, b: 25},
 
         ALL_LETTERS: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
@@ -236,7 +237,7 @@ function checkCorrectness(){
             if(PS.color(colOffset, rowOffset) === PS.COLOR_WHITE && PS.glyph(colOffset, rowOffset) !== 0){
                 //if it's incorrect, mark it as such
                 if(String.fromCharCode(PS.glyph(colOffset, rowOffset-1)) !== lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))[0]){
-                    PS.color(colOffset, rowOffset, PS.COLOR_RED);
+                    PS.color(colOffset, rowOffset, G.constants.WRONG_COL);
                 }
             }
 
@@ -333,7 +334,7 @@ PS.touch = function (x, y, data, options) {
 
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
-    if(PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === PS.COLOR_RED) {
+    if(PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COL) {
         selectBead(x, y);
     }
     //else deselect the bead if there is one selected and clicking on an non input bead
