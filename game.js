@@ -93,6 +93,7 @@ var G = (function () {
 //initializes the starting menu for the project
 //TODO: this is fugly
 function initStartMenu() {
+    resetGrid();
     screen = "start";
     //select the difficulty and then immediately go to the quote
     var diff = "DIFFICULTY";
@@ -109,6 +110,7 @@ function initStartMenu() {
 //letters above will be the cyphered text
 //black spaces below will contain the correct letter in their data field
 function initCypher(){
+    resetGrid();
     //create the cyphered string from the original
     var cyphered = lm.encode(original).join("");
 
@@ -154,13 +156,13 @@ function initCypher(){
         }
     }
 
-    var revealed;
+    var revealed = "";
     switch (difficulty){
         case 1:
             revealed = "RSTLNE";
             break;
         case 2:
-            revealed = "THE";
+            revealed = "TE";
             break;
         case 3:
             break;
@@ -372,7 +374,6 @@ PS.init = function (system, options) {
     //setup the grid
     PS.gridSize(G.constants.WIDTH, G.constants.HEIGHT);
     PS.gridColor(G.constants.BG_COL);
-    resetGrid();
     //initialize the cyphered text, all uppercase letters just in case also
     original = G.quotes.random().toUpperCase();
     difficulty = 1;
@@ -401,7 +402,6 @@ PS.touch = function (x, y, data, options) {
         if(PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
             difficulty = PS.glyph(x, y) - 48;
             screen = "play";
-            resetGrid();
             initCypher();
 
         }
