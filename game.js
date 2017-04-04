@@ -159,6 +159,7 @@ function updateCypher(letter){
             //PS.glyph(colOffset, rowOffset, PS.data(colOffset, rowOffset));
             if(PS.glyph(colOffset, rowOffset-1) === cypherLetter){
                 PS.glyph(colOffset, rowOffset, letter);
+                PS.color(colOffset, rowOffset, PS.COLOR_WHITE);
             }
 
             //increase the offset
@@ -217,36 +218,42 @@ function removeCypherLetter(){
 }
 
 //checks if the input values are correct
-//TODO: fix it so that it uses selected square to do the remove letter and stuff
-//TODO: remove the locking in function
-//TODO: don't remove letters that are wrong, but rather signify that they are wrong
 function checkCorrectness(){
+    //place the new letter in the new spot
+    var originalWords = original.split(" ");
+
+    //go through the entire cypher
     var colOffset = 0;
-    var rowOffset = G.constants.HEIGHT-3;
-    //print out the letters of the alphabet
-    for(var i = 0; i < 26; i++){
-        if(PS.glyph(colOffset, rowOffset) !== 0) {
-            //PS.debug(String.fromCharCode(PS.glyph(colOffset, rowOffset))+" "+PS.data(colOffset, rowOffset)+"\n");
-            //PS.debug(lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))+"\n");
-            //PS.debug(String.fromCharCode(PS.glyph(colOffset, rowOffset - 1))+"\n");
-            //i know this is fugly but might come back and look at it
-            if (String.fromCharCode(PS.glyph(colOffset, rowOffset - 1)) === lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))[0]) {
-                //lock it in
-                PS.color(colOffset, rowOffset, PS.COLOR_YELLOW);
-            }
-            else{
-                //remove it
-                selectedBead.x = colOffset;
-                selectedBead.y = rowOffset;
-                removeCypherLetter(PS.glyph(colOffset, rowOffset));
-            }
-        }
-        colOffset++;
-        if(colOffset >= G.constants.WIDTH){
+    var rowOffset = 1;
+    for(var i = 0; i < originalWords.length; i++){
+        //move word to next line if it won't fit on current line
+        if(colOffset + originalWords[i].length > G.constants.WIDTH){
             colOffset = 0;
             rowOffset += 2;
         }
+
+        for(var j = 0; j < originalWords[i].length; j++){
+            if(PS.color(colOffset, rowOffset) === PS.COLOR_WHITE && PS.glyph(colOffset, rowOffset) !== 0){
+                //if it's incorrect, mark it as such
+                if(String.fromCharCode(PS.glyph(colOffset, rowOffset-1)) !== lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))[0]){
+                    PS.color(colOffset, rowOffset, PS.COLOR_RED);
+                }
+            }
+
+            //increase the offset
+            colOffset++;
+        }
+
+        //add the space after words
+        colOffset++;
+        if(colOffset > G.constants.WIDTH-1){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
     }
+    //deselect the bead after the operation is done
+    selectBead(selectedBead.x, selectedBead.y);
 }
 
 
@@ -326,7 +333,7 @@ PS.touch = function (x, y, data, options) {
 
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
-    if(PS.color(x, y) === PS.COLOR_WHITE) {
+    if(PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === PS.COLOR_RED) {
         selectBead(x, y);
     }
     //else deselect the bead if there is one selected and clicking on an non input bead
