@@ -230,13 +230,15 @@ function updateCypher(letter){
     if(selectedBead.x !== null) {
         selectBead(selectedBead.x, selectedBead.y);
     }
+
+    checkCompletion();
 }
 
 //removes the letter in the selected space from the rest of the cypher
 function removeCypherLetter(){
 
     var originalWords = original.split(" ");
-    var letter = PS.glyph(selectedBead.x, selectedBead.y);
+    var letter = PS.glyph(selectedBead.x, selectedBead.y-1);
 
     //go through the entire cypher
     var colOffset = 0;
@@ -251,7 +253,7 @@ function removeCypherLetter(){
 
         for(var j = 0; j < originalWords[i].length; j++){
             //PS.glyph(colOffset, rowOffset, PS.data(colOffset, rowOffset));
-            if(PS.glyph(colOffset, rowOffset) === letter){
+            if(PS.glyph(colOffset, rowOffset-1) === letter){
                 PS.glyph(colOffset, rowOffset, 0);
             }
 
@@ -289,7 +291,7 @@ function checkCorrectness(){
         for(var j = 0; j < originalWords[i].length; j++){
             if(PS.color(colOffset, rowOffset) === PS.COLOR_WHITE && PS.glyph(colOffset, rowOffset) !== 0){
                 //if it's incorrect, mark it as such
-                if(String.fromCharCode(PS.glyph(colOffset, rowOffset-1)) !== lm.encode(String.fromCharCode(PS.glyph(colOffset, rowOffset)))[0]){
+                if(String.fromCharCode(PS.glyph(colOffset, rowOffset)) !== PS.data(colOffset, rowOffset)){
                     PS.color(colOffset, rowOffset, G.constants.WRONG_COL);
                 }
             }
@@ -313,7 +315,50 @@ function checkCorrectness(){
 //function to check to see if the cypher is completely solved
 //TODO: check completion of the puzzle when prompted
 function checkCompletion(){
+    var correct = true;
+    var originalWords = original.split(" ");
 
+    //go through the entire cypher
+    var colOffset = 0;
+    var rowOffset = 1;
+    for(var i = 0; i < originalWords.length; i++){
+        //move word to next line if it won't fit on current line
+        if(colOffset + originalWords[i].length > G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
+        for(var j = 0; j < originalWords[i].length; j++){
+            if(PS.color(colOffset, rowOffset) === PS.COLOR_WHITE){
+                //if it's incorrect, mark it as such
+                if(String.fromCharCode(PS.glyph(colOffset, rowOffset)) !== PS.data(colOffset, rowOffset)){
+                    correct = false;
+                }
+            }
+
+            //increase the offset
+            colOffset++;
+        }
+
+        //add the space after words
+        colOffset++;
+        if(colOffset > G.constants.WIDTH-1){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
+    }
+
+    if(correct){
+        congratulate();
+    }
+}
+
+function congratulate(){
+    var message = "CONGRATULATIONS!";
+    for(var i = 0; i < message.length; i++){
+        PS.glyph(i, G.constants.HEIGHT-1, message[i]);
+    }
 }
 
 
