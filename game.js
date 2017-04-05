@@ -40,6 +40,15 @@ var G = (function () {
         ALL_LETTERS: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
     };
 
+    var originalQuote;
+    var difficulty;
+    var screen;
+    var lm = new LetterMap();
+    var selectedBead = {
+        x: null,
+        y: null
+    };
+
     var quotes = {list:(function() {
         return ["THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU. -MAYA ANGELOU",
                 "He who fights with monsters might take care lest he thereby become a monster. And if you gaze for long into an abyss, the abyss gazes also into you."];
@@ -87,6 +96,8 @@ var G = (function () {
     return {
         constants: constants,
         quotes:quotes,
+        lm:lm,
+        selectedBead:selectedBead,
         LetterMap: LetterMap
     };
 }());
@@ -95,7 +106,7 @@ var G = (function () {
 //TODO: this is fugly
 function initStartMenu() {
     resetGrid();
-    screen = "start";
+    G.screen = "start";
     //select the difficulty and then immediately go to the quote
     var diff = "DIFFICULTY";
     for(var i = 0; i < diff.length; i++){
@@ -113,10 +124,10 @@ function initStartMenu() {
 function initCypher(){
     resetGrid();
     //create the cyphered string from the originalQuote
-    var cyphered = lm.encode(originalQuote).join("");
+    var cyphered = G.lm.encode(G.originalQuote).join("");
 
     //split the strings into their individual words
-    var originalWords = originalQuote.split(" ");
+    var originalWords = G.originalQuote.split(" ");
     cyphered = cyphered.split(" ");
 
     var colOffset = 0;
@@ -158,7 +169,7 @@ function initCypher(){
     }
 
     var revealed = "";
-    switch (difficulty){
+    switch (G.difficulty){
         case 1:
             revealed = "RSTLNE";
             break;
@@ -178,17 +189,17 @@ function initCypher(){
 //update cypher with the new input data
 function updateCypher(letter){
     //place the new letter in the new spot
-    if(selectedBead.x !== null) {
-        PS.glyph(selectedBead.x, selectedBead.y, letter);
+    if(G.selectedBead.x !== null) {
+        PS.glyph(G.selectedBead.x, G.selectedBead.y, letter);
     }
-    var originalWords = originalQuote.split(" ");
+    var originalWords = G.originalQuote.split(" ");
     var cypherLetter;
 
-    if(selectedBead.x !== null) {
-        cypherLetter = PS.glyph(selectedBead.x, selectedBead.y - 1);
+    if(G.selectedBead.x !== null) {
+        cypherLetter = PS.glyph(G.selectedBead.x, G.selectedBead.y - 1);
     }
     else{
-        cypherLetter = lm.encode(letter)[0];
+        cypherLetter = G.lm.encode(letter)[0];
     }
 
     //go through the entire cypher
@@ -209,7 +220,7 @@ function updateCypher(letter){
                 PS.glyph(colOffset, rowOffset, letter);
 
 
-                if(selectedBead.x === null){
+                if(G.selectedBead.x === null){
                     PS.color(colOffset, rowOffset, PS.COLOR_YELLOW);
                 }
                 else {
@@ -231,8 +242,8 @@ function updateCypher(letter){
 
     }
     //deselect the bead after the operation is done
-    if(selectedBead.x !== null) {
-        selectBead(selectedBead.x, selectedBead.y);
+    if(G.selectedBead.x !== null) {
+        selectBead(G.selectedBead.x, G.selectedBead.y);
     }
 
     checkCompletion();
@@ -241,8 +252,8 @@ function updateCypher(letter){
 //removes the letter in the selected space from the rest of the cypher
 function removeCypherLetter(){
 
-    var originalWords = originalQuote.split(" ");
-    var letter = PS.glyph(selectedBead.x, selectedBead.y-1);
+    var originalWords = G.originalQuote.split(" ");
+    var letter = PS.glyph(G.selectedBead.x, G.selectedBead.y-1);
 
     //go through the entire cypher
     var colOffset = 0;
@@ -274,13 +285,13 @@ function removeCypherLetter(){
 
     }
     //deselect the bead after the operation is done
-    selectBead(selectedBead.x, selectedBead.y);
+    selectBead(G.selectedBead.x, G.selectedBead.y);
 }
 
 //checks if the input values are correct
 function checkCorrectness(){
     //place the new letter in the new spot
-    var originalWords = originalQuote.split(" ");
+    var originalWords = G.originalQuote.split(" ");
 
     //go through the entire cypher
     var colOffset = 0;
@@ -318,14 +329,14 @@ function checkCorrectness(){
 
     }
     //deselect the bead after the operation is done
-    selectBead(selectedBead.x, selectedBead.y);
+    selectBead(G.selectedBead.x, G.selectedBead.y);
 }
 
 //function to check to see if the cypher is completely solved
 //TODO: check completion of the puzzle when prompted
 function checkCompletion(){
     var correct = true;
-    var originalWords = originalQuote.split(" ");
+    var originalWords = G.originalQuote.split(" ");
 
     //go through the entire cypher
     var colOffset = 0;
@@ -375,20 +386,20 @@ function congratulate(){
 function selectBead(x, y){
 
     //deselect the previous selected bead
-    if(selectedBead.x !== null && selectedBead.y !== null) {
-        PS.border(selectedBead.x, selectedBead.y, 2);
-        PS.borderColor(selectedBead.x, selectedBead.y, PS.COLOR_BLACK);
+    if(G.selectedBead.x !== null && G.selectedBead.y !== null) {
+        PS.border(G.selectedBead.x, G.selectedBead.y, 2);
+        PS.borderColor(G.selectedBead.x, G.selectedBead.y, PS.COLOR_BLACK);
     }
     //select the new bead if its not the same one
-    if(selectedBead.x !== x || selectedBead.y !== y) {
+    if(G.selectedBead.x !== x || G.selectedBead.y !== y) {
         PS.border(x, y, 4);
         PS.borderColor(x, y, PS.COLOR_RED);
-        selectedBead.x = x;
-        selectedBead.y = y;
+        G.selectedBead.x = x;
+        G.selectedBead.y = y;
     }
     else{
-        selectedBead.x = null;
-        selectedBead.y = null;
+        G.selectedBead.x = null;
+        G.selectedBead.y = null;
     }
 }
 
@@ -415,22 +426,17 @@ function resetGrid(){
 // the initial dimensions you want (32 x 32 maximum)
 // Do this FIRST to avoid problems!
 
-var originalQuote;
-var difficulty;
-var screen;
-var lm = new G.LetterMap();
-var selectedBead = {
-    x: null,
-    y: null
-};
+
+
+
 
 PS.init = function (system, options) {
     //setup the grid
     PS.gridSize(G.constants.WIDTH, G.constants.HEIGHT);
     PS.gridColor(G.constants.BG_COL);
     //initialize the cyphered text, all uppercase letters just in case also
-    originalQuote = G.quotes.random().toUpperCase();
-    difficulty = 1;
+    G.originalQuote = G.quotes.random().toUpperCase();
+    G.difficulty = 1;
     //initCypher();
     initStartMenu();
 };
@@ -452,10 +458,10 @@ PS.touch = function (x, y, data, options) {
 
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
-    if(screen === "start"){
+    if(G.screen === "start"){
         if(PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
-            difficulty = PS.glyph(x, y) - 48;
-            screen = "play";
+            G.difficulty = PS.glyph(x, y) - 48;
+            G.screen = "play";
             initCypher();
 
         }
@@ -465,8 +471,8 @@ PS.touch = function (x, y, data, options) {
             selectBead(x, y);
         }
         //else deselect the bead if there is one selected and clicking on an non input bead
-        else if (selectedBead.x !== null && selectedBead.y !== null) {
-            selectBead(selectedBead.x, selectedBead.y);
+        else if (G.selectedBead.x !== null && G.selectedBead.y !== null) {
+            selectBead(G.selectedBead.x, G.selectedBead.y);
         }
 
 
@@ -508,7 +514,7 @@ PS.enter = function (x, y, data, options) {
     // PS.debug( "PS.enter() @ " + x + ", " + y + "\n" );
 
     // Add code here for when the mouse cursor/touch enters a bead
-    if(screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
+    if(G.screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
         PS.border(x, y, 3);
         PS.borderColor(x, y, G.constants.RIGHT_COL);
     }
@@ -527,7 +533,7 @@ PS.exit = function (x, y, data, options) {
     // PS.debug( "PS.exit() @ " + x + ", " + y + "\n" );
 
     // Add code here for when the mouse cursor/touch exits a bead
-    if(screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
+    if(G.screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
         PS.border(x, y, 0);
     }
 };
@@ -560,12 +566,12 @@ PS.keyDown = function (key, shift, ctrl, options) {
     // Add code here for when a key is pressed
     //if there is a selected bead, set it in the selected
     //TODO: currently does not check if the key is actually a letter
-    if(selectedBead.x !== null && selectedBead.y !== null){
+    if(G.selectedBead.x !== null && G.selectedBead.y !== null){
         //if backspace is pressed
-        if((key === 8 || key === 32) && selectedBead.x !== null){
+        if((key === 8 || key === 32) && G.selectedBead.x !== null){
             //remove the letter and deselect the bead
-            removeCypherLetter(PS.glyph(selectedBead.x, selectedBead.y));
-            selectBead(selectedBead.x, selectedBead.y);
+            removeCypherLetter(PS.glyph(G.selectedBead.x, G.selectedBead.y));
+            selectBead(G.selectedBead.x, G.selectedBead.y);
         }
         else {
             updateCypher(String.fromCharCode(key).toUpperCase());
