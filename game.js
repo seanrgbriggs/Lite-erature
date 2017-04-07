@@ -224,6 +224,12 @@ function initCypher(){
         updateCypher(revealed[i]);
     }
 
+    //put the back button
+    var back = "BACK";
+    for(var i = 0; i < back.length; i++){
+        PS.glyph(i, 0, back[i]);
+        PS.borderColor(i, 0, PS.COLOR_YELLOW);
+    }
     PS.glyph(G.constants.WIDTH-1, G.constants.HEIGHT-1, "✓");
 }
 
@@ -524,7 +530,10 @@ PS.touch = function (x, y, data, options) {
         initCypher();
     }
     else if(G.screen === "play"){
-        if (PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COLOR) {
+        if(x < 4 && y === 0){
+            levelSelectScreen();
+        }
+        else if (PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COLOR) {
             selectBead(x, y);
         }
         //else deselect the bead if there is one selected and clicking on an non input bead
@@ -606,6 +615,14 @@ PS.enter = function (x, y, data, options) {
             } );
         }
     }
+    else if(G.screen === "play"){
+        if(x < 4 && y === 0){
+            PS.border(0, 0, {bottom : 2});
+            PS.border(1, 0, {bottom : 2});
+            PS.border(2, 0, {bottom : 2});
+            PS.border(3, 0, {bottom : 2, right : 2});
+        }
+    }
 };
 
 // PS.exit ( x, y, data, options )
@@ -624,7 +641,7 @@ PS.exit = function (x, y, data, options) {
     if(G.screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
         PS.border(x, y, 0);
     }
-    if(G.screen === "levelselect"){
+    else if(G.screen === "levelselect"){
         if(data[0] === "left"){
             PS.border(x, y, 0);
             PS.border(x+1, y, 0);
@@ -632,6 +649,14 @@ PS.exit = function (x, y, data, options) {
         else if(data[0] === "right"){
             PS.border(x-1, y, 0);
             PS.border(x, y, 0);
+        }
+    }
+    else if(G.screen === "play"){
+        if(x < 4 && y === 0){
+            PS.border(0, 0, 0);
+            PS.border(1, 0, 0);
+            PS.border(2, 0, 0);
+            PS.border(3, 0, 0);
         }
     }
 };
