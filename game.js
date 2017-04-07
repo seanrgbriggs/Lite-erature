@@ -201,7 +201,7 @@ function initCypher(){
     G.lm = new G.LetterMap();
     resetGrid();
     G.screen = "play";
-    G.hintTimer = window.setTimeout(hint, 3000);
+    G.hintTimer = window.setTimeout(hint, 10000);
     if(G.currentLevel !== "infinite") {
         PS.statusText(G.levelQuotes[G.currentLevel][2]);
     }
@@ -267,13 +267,33 @@ function initCypher(){
         PS.glyph(i, 0, back[i]);
         PS.borderColor(i, 0, PS.COLOR_YELLOW);
     }
+
+    //instruction if on the first level
+    if(G.currentLevel === 0) {
+        var line1 = "CLICK ON AN";
+        var line2 = "EMPTY SPACE.";
+        var line3 = "TYPE A LETTER.";
+        var line4 = "SOLVE THE PUZZLE";
+        for (var i = 0; i < line1.length; i++) {
+            PS.glyph(i, 12, line1[i]);
+        }
+        for (var i = 0; i < line2.length; i++) {
+            PS.glyph(i, 13, line2[i]);
+        }
+        for (var i = 0; i < line3.length; i++) {
+            PS.glyph(i, 15, line3[i]);
+        }
+        for (var i = 0; i < line4.length; i++) {
+            PS.glyph(i, 17, line4[i]);
+        }
+    }
 }
 
 //update cypher with the new input data
 function updateCypher(letter){
     //place the new letter in the new spot
     clearTimeout(G.hintTimer);
-    G.hintTimer = setTimeout(hint, 3000);
+    G.hintTimer = setTimeout(hint, 10000);
     if(G.selectedBead.x !== null) {
         PS.glyph(G.selectedBead.x, G.selectedBead.y, letter);
     }
@@ -458,6 +478,11 @@ function checkCompletion(){
         congratulate();
         checkCorrectness();
         clearTimeout(G.hintTimer);
+        PS.border(0, G.constants.HEIGHT-1, 0);
+        PS.border(1, G.constants.HEIGHT-1, 0);
+        PS.border(2, G.constants.HEIGHT-1, 0);
+        PS.border(3, G.constants.HEIGHT-1, 0);
+        PS.border(4, G.constants.HEIGHT-1, 0);
     }
 }
 
@@ -546,6 +571,7 @@ function resetGrid(){
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
     PS.fade(PS.ALL, PS.ALL, 0);
     PS.data(PS.ALL, PS.ALL, 0);
+    clearTimeout(G.hintTimer);
 }
 
 // All of the functions below MUST exist, or the engine will complain!
@@ -634,7 +660,7 @@ PS.touch = function (x, y, data, options) {
         else if (x >= 15 && y === G.constants.HEIGHT-1 && PS.glyph(x,y) !== 0) {
             checkCorrectness();
         }
-        else if(x === 0 && y === G.constants.HEIGHT-1){
+        else if(x <= 4 && y === G.constants.HEIGHT-1 && PS.glyph(x, y) !== 0){
             revealLetter();
         }
     }
@@ -697,33 +723,14 @@ PS.enter = function (x, y, data, options) {
     else if(G.screen === "levelselect"){
         //light up the numbers when hovered over
         if(data[0] === "left"){
-            PS.border( x, y, {
-                top : 2,
-                left : 2,
-                bottom : 2,
-                right : 0
-            } );
-            PS.border( x+1, y, {
-                top : 2,
-                left : 0,
-                bottom : 2,
-                right : 2
-            } );
+            PS.border( x, y, {top : 2, left : 2, bottom : 2, right : 0});
+            PS.border( x+1, y, {top : 2, left : 0, bottom : 2, right : 2});
         }
         else if(data[0] === "right"){
-            PS.border( x-1, y, {
-                top : 2,
-                left : 2,
-                bottom : 2,
-                right : 0
-            } );
-            PS.border( x, y, {
-                top : 2,
-                left : 0,
-                bottom : 2,
-                right : 2
-            } );
+            PS.border( x-1, y, {top : 2, left : 2,  bottom : 2, right : 0});
+            PS.border( x, y, {top : 2, left : 0, bottom : 2, right : 2});
         }
+        //infinite button
         else if(y === 13 && PS.glyph(x, y) !== 0){
             PS.border(6, 13, {top : 2, left : 2, bottom : 2});
             PS.border(7, 13, {top : 2, bottom : 2});
@@ -750,6 +757,14 @@ PS.enter = function (x, y, data, options) {
             PS.border(17, G.constants.HEIGHT-1, {top : 2});
             PS.border(18, G.constants.HEIGHT-1, {top : 2});
             PS.border(19, G.constants.HEIGHT-1, {top : 2});
+        }
+        //hint button
+        else if(x <= 4 && y === G.constants.HEIGHT-1 && PS.glyph(x, y) !== 0){
+            PS.border(0, G.constants.HEIGHT-1, {top : 2});
+            PS.border(1, G.constants.HEIGHT-1, {top : 2});
+            PS.border(2, G.constants.HEIGHT-1, {top : 2});
+            PS.border(3, G.constants.HEIGHT-1, {top : 2});
+            PS.border(4, G.constants.HEIGHT-1, {top : 2, right : 2});
         }
     }
     else if(G.screen === "congrats"){
@@ -787,6 +802,7 @@ PS.exit = function (x, y, data, options) {
         PS.border(x, y, 0);
     }
     else if(G.screen === "levelselect"){
+        //highlight the selected number level
         if(data[0] === "left"){
             PS.border(x, y, 0);
             PS.border(x+1, y, 0);
@@ -795,6 +811,7 @@ PS.exit = function (x, y, data, options) {
             PS.border(x-1, y, 0);
             PS.border(x, y, 0);
         }
+        //infinite button
         else if(y === 13 && PS.glyph(x, y) !== 0){
             PS.border(6, 13, 0);
             PS.border(7, 13, 0);
@@ -814,12 +831,21 @@ PS.exit = function (x, y, data, options) {
             PS.border(2, 0, 0);
             PS.border(3, 0, 0);
         }
+        //check button
         else if(x >= 15 && y === G.constants.HEIGHT-1){
             PS.border(15, G.constants.HEIGHT-1, 0);
             PS.border(16, G.constants.HEIGHT-1, 0);
             PS.border(17, G.constants.HEIGHT-1, 0);
             PS.border(18, G.constants.HEIGHT-1, 0);
             PS.border(19, G.constants.HEIGHT-1, 0);
+        }
+        //hint button
+        else if(x <= 4 && y === G.constants.HEIGHT-1){
+            PS.border(0, G.constants.HEIGHT-1, 0);
+            PS.border(1, G.constants.HEIGHT-1, 0);
+            PS.border(2, G.constants.HEIGHT-1, 0);
+            PS.border(3, G.constants.HEIGHT-1, 0);
+            PS.border(4, G.constants.HEIGHT-1, 0);
         }
 
     }
