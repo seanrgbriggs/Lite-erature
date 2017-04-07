@@ -51,12 +51,13 @@ var G = (function () {
     };
     //2 parts to every quote: quote and revealed letters
     var levelQuotes = [
-        ["I know. I was there. I saw the great void in your soul, and you saw mine.","KOWASVOULDTHEG"],
-        ["I look at you and a sense of wonder takes me.", "SDYOFUELW"],
-        ["I took a deep breath and listened to the old brag of my heart; I am, I am, I am.", "TEIBHLGD"],
-        ["It was the best of times, it was the worst of times.", "BEFEWOR"],
-        ["To be, or not to be: that is the question", ""],
-        ["Everything was terrifyingly complex; everything was terrifyingly simple.", ""],
+        ["I know. I was there. I saw the great void in your soul, and you saw mine.","KOWASVOULDTHEG", "1: Single-Letter Words are Nice"],
+        ["I look at you and a sense of wonder takes me.", "SDYOFUELW", "2: More Single-Letter Words"],
+        ["I took a deep breath and listened to the old brag of my heart; I am, I am, I am.", "TEIBHLGD", "3: Small Words are Your Friends"],
+        ["It was the best of times, it was the worst of times.", "BEFEWORS", "4: Some Words Repeat"],
+        ["To be, or not to be: that is the question", "THAQUN", "5: Small Word Repetition"],
+        ["Everything was terrifyingly complex; everything was terrifyingly simple.", "ING"],
+        ["I don't know what's worse: to not know what you are and be happy, or to become what you've always wanted to be, and feel alone.", "", "7: What Comes After Apostrophes?"],
         "It is a far, far better thing that I do than I have ever done before; it is a far, far better rest that I go to, than I have ever known."];
 
     var quotes = {list:(function() {
@@ -143,6 +144,7 @@ function initStartMenu() {
 function levelSelectScreen(){
     resetGrid();
     G.screen = "levelselect";
+    PS.statusText("Select a Level");
     var colOffset = 3;
     var rowOffset = 3;
     for(var level = 1; level <= 15; level++){
@@ -163,6 +165,11 @@ function levelSelectScreen(){
             rowOffset += 3;
         }
     }
+    var inf = "INFINITE";
+    for(var i = 0; i < inf.length; i++){
+        PS.borderColor(6+i, 13, PS.COLOR_YELLOW);
+        PS.glyph(6+i, 13, inf[i]);
+    }
 }
 
 //initializes the cypher to be solved
@@ -171,6 +178,12 @@ function levelSelectScreen(){
 function initCypher(){
     resetGrid();
     G.screen = "play";
+    if(G.currentLevel !== "infinite") {
+        PS.statusText(G.levelQuotes[G.currentLevel][2]);
+    }
+    else{
+        PS.statusText("Infinite Mode");
+    }
     //create the cyphered string from the originalQuote
     var cyphered = G.lm.encode(G.originalQuote).join("");
 
@@ -423,7 +436,6 @@ function checkCompletion(){
 function congratulate(){
     G.screen = "congrats";
     PS.statusText("Congratulations!");
-    PS.statusColor(PS.COLOR_WHITE);
     var next = "NEXT";
     for(var i = 0; i < next.length; i++){
         PS.glyph(16+i, 0, next[i]);
@@ -460,6 +472,7 @@ function resetGrid(){
     PS.glyph(PS.ALL, PS.ALL, 0);
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
     PS.fade(PS.ALL, PS.ALL, 0);
+    PS.data(PS.ALL, PS.ALL, 0);
 }
 
 // All of the functions below MUST exist, or the engine will complain!
@@ -487,7 +500,7 @@ PS.init = function (system, options) {
     PS.gridColor(G.constants.BG_COLOR);
     //initialize the cyphered text, all uppercase letters just in case also
     G.originalQuote = G.quotes.list[G.currentLevel].toUpperCase();
-    G.difficulty = 1;
+    PS.statusColor(PS.COLOR_WHITE);
     //initCypher();
     levelSelectScreen();
 };
@@ -510,11 +523,19 @@ PS.touch = function (x, y, data, options) {
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
     if(G.screen === "levelselect"){
-        if(PS.data(x,y) != 0){
-            G.currentLevel = PS.data(x,y)[1]-1;
-            G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
-            initCypher();
+        if(PS.glyph(x, y) !== 0) {
+            if (PS.data(x, y) !== 0) {
+                G.currentLevel = PS.data(x, y)[1] - 1;
+                G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
+                initCypher();
+            }
+            else{
+                G.currentLevel = "infinite";
+                G.originalQuote = G.quotes.random().toUpperCase();
+                initCypher();
+            }
         }
+
     }
     else if(G.screen === "start"){
         if(PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
@@ -548,8 +569,14 @@ PS.touch = function (x, y, data, options) {
         }
         //next level button
         else if(x >= 16 && y == 0){
-            G.currentLevel++;
-            G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
+            //normal level mode
+            if(G.currentLevel !== "infinite") {
+                G.currentLevel++;
+                G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
+            }
+            else{
+                G.originalQuote = G.quotes.random().toUpperCase();
+            }
             initCypher();
         }
 
@@ -621,6 +648,16 @@ PS.enter = function (x, y, data, options) {
                 right : 2
             } );
         }
+        else if(y === 13 && PS.glyph(x, y) !== 0){
+            PS.border(6, 13, {top : 2, left : 2, bottom : 2});
+            PS.border(7, 13, {top : 2, bottom : 2});
+            PS.border(8, 13, {top : 2, bottom : 2});
+            PS.border(9, 13, {top : 2, bottom : 2});
+            PS.border(10, 13, {top : 2, bottom : 2});
+            PS.border(11, 13, {top : 2, bottom : 2});
+            PS.border(12, 13, {top : 2, bottom : 2});
+            PS.border(13, 13, {top : 2, right : 2, bottom : 2});
+        }
     }
     else if(G.screen === "play"){
         //back button
@@ -681,6 +718,16 @@ PS.exit = function (x, y, data, options) {
         else if(data[0] === "right"){
             PS.border(x-1, y, 0);
             PS.border(x, y, 0);
+        }
+        else if(y === 13 && PS.glyph(x, y) !== 0){
+            PS.border(6, 13, 0);
+            PS.border(7, 13, 0);
+            PS.border(8, 13, 0);
+            PS.border(9, 13, 0);
+            PS.border(10, 13, 0);
+            PS.border(11, 13, 0);
+            PS.border(12, 13, 0);
+            PS.border(13, 13, 0);
         }
     }
     else if(G.screen === "play"){
