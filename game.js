@@ -43,7 +43,7 @@ var G = (function () {
     var originalQuote;
     var difficulty;
     var screen;
-    var currentLevel;
+    var currentLevel = 0;
     var lm = new LetterMap();
     var selectedBead = {
         x: null,
@@ -93,19 +93,17 @@ var G = (function () {
         return outputMap;
     }
 
-
-
     return {
         constants: constants,
         quotes:quotes,
         lm:lm,
+        currentLevel:currentLevel,
         selectedBead:selectedBead,
         LetterMap: LetterMap
     };
 }());
 
 //initializes the starting menu for the project
-//TODO: this is fugly
 function initStartMenu() {
     resetGrid();
     G.screen = "start";
@@ -453,7 +451,7 @@ PS.init = function (system, options) {
     PS.gridSize(G.constants.WIDTH, G.constants.HEIGHT);
     PS.gridColor(G.constants.BG_COL);
     //initialize the cyphered text, all uppercase letters just in case also
-    G.originalQuote = G.quotes.random().toUpperCase();
+    G.originalQuote = G.quotes.list[G.currentLevel].toUpperCase();
     G.difficulty = 1;
     //initCypher();
     initStartMenu();
@@ -487,7 +485,8 @@ PS.touch = function (x, y, data, options) {
     //go to the next level, if possible
     else if(G.screen === "congrats"){
         G.lm = new G.LetterMap();
-        G.originalQuote = G.quotes.list[1];
+        G.currentLevel++;
+        G.originalQuote = G.quotes.list[G.currentLevel].toUpperCase();
         initCypher();
     }
     else if(G.screen === "play"){
