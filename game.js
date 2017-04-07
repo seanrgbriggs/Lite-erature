@@ -49,10 +49,18 @@ var G = (function () {
         x: null,
         y: null
     };
+    //2 parts to every quote: quote and revealed letters
+    var levelQuotes = [
+        ["I know. I was there. I saw the great void in your soul, and you saw mine.","KOWASVOULDTHEG"],
+        ["I look at you and a sense of wonder takes me.", "SDYOFUELW"],
+        ["I took a deep breath and listened to the old brag of my heart; I am, I am, I am.", "TEIBHLGD"],
+        ["It was the best of times, it was the worst of times.", "BEFEWOR"],
+        ["To be, or not to be: that is the question", ""],
+        ["Everything was terrifyingly complex; everything was terrifyingly simple.", ""],
+        "It is a far, far better thing that I do than I have ever done before; it is a far, far better rest that I go to, than I have ever known."];
 
     var quotes = {list:(function() {
-        return ["To be, or not to be: that is the question",
-                "THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU.",
+        return ["THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU.",
                 "He who fights with monsters might take care lest he thereby become a monster. And if you gaze for long into an abyss, the abyss gazes also into you."];
     })(),
     random:function () {
@@ -95,6 +103,7 @@ var G = (function () {
 
     return {
         constants: constants,
+        levelQuotes:levelQuotes,
         quotes:quotes,
         lm:lm,
         currentLevel:currentLevel,
@@ -208,15 +217,8 @@ function initCypher(){
     }
 
     var revealed = "";
-    switch (G.difficulty){
-        case 1:
-            revealed = "RSTLNE";
-            break;
-        case 2:
-            revealed = "TE";
-            break;
-        case 3:
-            break;
+    if(G.currentLevel < 15){
+        revealed = G.levelQuotes[G.currentLevel][1];
     }
     for(var i = 0; i < revealed.length; i++){
         updateCypher(revealed[i]);
@@ -480,7 +482,7 @@ PS.init = function (system, options) {
     G.originalQuote = G.quotes.list[G.currentLevel].toUpperCase();
     G.difficulty = 1;
     //initCypher();
-    initStartMenu();
+    levelSelectScreen();
 };
 
 
@@ -500,7 +502,14 @@ PS.touch = function (x, y, data, options) {
 
     // Add code here for mouse clicks/touches over a bead
     //if this is one of the empty beads
-    if(G.screen === "start"){
+    if(G.screen === "levelselect"){
+        if(PS.data(x,y) != 0){
+            G.currentLevel = PS.data(x,y)[1]-1;
+            G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
+            initCypher();
+        }
+    }
+    else if(G.screen === "start"){
         if(PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
             G.difficulty = PS.glyph(x, y) - 48;
             levelSelectScreen();
@@ -511,7 +520,7 @@ PS.touch = function (x, y, data, options) {
     else if(G.screen === "congrats"){
         G.lm = new G.LetterMap();
         G.currentLevel++;
-        G.originalQuote = G.quotes.list[G.currentLevel].toUpperCase();
+        G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
         initCypher();
     }
     else if(G.screen === "play"){
