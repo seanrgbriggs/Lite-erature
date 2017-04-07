@@ -423,10 +423,13 @@ function checkCompletion(){
 }
 
 function congratulate(){
-    var message = "CONGRATULATIONS!";
     G.screen = "congrats";
-    for(var i = 0; i < message.length; i++){
-        PS.glyph(i, G.constants.HEIGHT-1, message[i]);
+    PS.statusText("Congratulations!");
+    PS.statusColor(PS.COLOR_WHITE);
+    var next = "NEXT";
+    for(var i = 0; i < next.length; i++){
+        PS.glyph(16+i, 0, next[i]);
+        PS.borderColor(16+i, 0, PS.COLOR_YELLOW);
     }
 }
 
@@ -522,17 +525,12 @@ PS.touch = function (x, y, data, options) {
 
         }
     }
-    //go to the next level, if possible
-    else if(G.screen === "congrats"){
-        G.lm = new G.LetterMap();
-        G.currentLevel++;
-        G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
-        initCypher();
-    }
     else if(G.screen === "play"){
+        //back button
         if(x < 4 && y === 0){
             levelSelectScreen();
         }
+        //select bead
         else if (PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COLOR) {
             selectBead(x, y);
         }
@@ -540,12 +538,23 @@ PS.touch = function (x, y, data, options) {
         else if (G.selectedBead.x !== null && G.selectedBead.y !== null) {
             selectBead(G.selectedBead.x, G.selectedBead.y);
         }
-
-
-        //if clicking the check button
+        //check button
         if (PS.glyph(x, y) === 10003) {
             checkCorrectness();
         }
+    }
+    else if(G.screen === "congrats"){
+        //back button
+        if(x < 4 && y === 0){
+            levelSelectScreen();
+        }
+        //next level button
+        else if(x >= 16 && y == 0){
+            G.currentLevel++;
+            G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
+            initCypher();
+        }
+
     }
 
 
@@ -623,6 +632,22 @@ PS.enter = function (x, y, data, options) {
             PS.border(3, 0, {bottom : 2, right : 2});
         }
     }
+    else if(G.screen === "congrats"){
+        //back button
+        if(x < 4 && y === 0){
+            PS.border(0, 0, {bottom : 2});
+            PS.border(1, 0, {bottom : 2});
+            PS.border(2, 0, {bottom : 2});
+            PS.border(3, 0, {bottom : 2, right : 2});
+        }
+        //next button
+        if(x >= 16 && y === 0){
+            PS.border(16, 0, {left : 2, bottom : 2});
+            PS.border(17, 0, {bottom : 2});
+            PS.border(18, 0, {bottom : 2});
+            PS.border(19, 0, {bottom : 2});
+        }
+    }
 };
 
 // PS.exit ( x, y, data, options )
@@ -652,11 +677,28 @@ PS.exit = function (x, y, data, options) {
         }
     }
     else if(G.screen === "play"){
+        //back button
         if(x < 4 && y === 0){
             PS.border(0, 0, 0);
             PS.border(1, 0, 0);
             PS.border(2, 0, 0);
             PS.border(3, 0, 0);
+        }
+    }
+    else if(G.screen === "congrats"){
+        //back button
+        if(x < 4 && y === 0){
+            PS.border(0, 0, 0);
+            PS.border(1, 0, 0);
+            PS.border(2, 0, 0);
+            PS.border(3, 0, 0);
+        }
+        //next button
+        else if(x >= 16 && y === 0){
+            PS.border(16, 0, 0);
+            PS.border(17, 0, 0);
+            PS.border(18, 0, 0);
+            PS.border(19, 0, 0);
         }
     }
 };
