@@ -43,6 +43,7 @@ var G = (function () {
     var originalQuote;
     var difficulty;
     var screen;
+    var currentLevel;
     var lm = new LetterMap();
     var selectedBead = {
         x: null,
@@ -50,7 +51,8 @@ var G = (function () {
     };
 
     var quotes = {list:(function() {
-        return ["THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU. -MAYA ANGELOU",
+        return ["To be, or not to be: that is the question",
+                "THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU.",
                 "He who fights with monsters might take care lest he thereby become a monster. And if you gaze for long into an abyss, the abyss gazes also into you."];
     })(),
     random:function () {
@@ -107,6 +109,18 @@ var G = (function () {
 function initStartMenu() {
     resetGrid();
     G.screen = "start";
+
+    var start = "START GAME";
+    for(var i = 0; i < start.length; i++){
+        if(start[i] !== " ") {
+            PS.glyph(5 + i, 4, start[i]);
+            PS.glyph(5 + i, 5, G.lm.encode(start[i])[0]);
+            PS.glyphColor(5 + i, 5, PS.COLOR_BLACK);
+            PS.color(5 + i, 5, PS.COLOR_YELLOW);
+            PS.border(5 + i, 5, 2);
+        }
+    }
+
     //select the difficulty and then immediately go to the quote
     var diff = "DIFFICULTY";
     for(var i = 0; i < diff.length; i++){
@@ -116,6 +130,7 @@ function initStartMenu() {
     PS.glyph(5, 11, "1");
     PS.glyph(9, 11, "2");
     PS.glyph(13, 11, "3");
+
 }
 
 //initializes the cypher to be solved
@@ -123,6 +138,7 @@ function initStartMenu() {
 //black spaces below will contain the correct letter in their data field
 function initCypher(){
     resetGrid();
+    G.screen = "play";
     //create the cyphered string from the originalQuote
     var cyphered = G.lm.encode(G.originalQuote).join("");
 
@@ -376,6 +392,7 @@ function checkCompletion(){
 
 function congratulate(){
     var message = "CONGRATULATIONS!";
+    G.screen = "congrats";
     for(var i = 0; i < message.length; i++){
         PS.glyph(i, G.constants.HEIGHT-1, message[i]);
     }
@@ -409,6 +426,7 @@ function resetGrid(){
     PS.borderColor(PS.ALL, PS.ALL, PS.COLOR_BLACK);
     PS.glyph(PS.ALL, PS.ALL, 0);
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
+    PS.fade(PS.ALL, PS.ALL, 0);
 }
 
 // All of the functions below MUST exist, or the engine will complain!
@@ -466,7 +484,13 @@ PS.touch = function (x, y, data, options) {
 
         }
     }
-    else {
+    //go to the next level, if possible
+    else if(G.screen === "congrats"){
+        G.lm = new G.LetterMap();
+        G.originalQuote = G.quotes.list[1];
+        initCypher();
+    }
+    else if(G.screen === "play"){
         if (PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COL) {
             selectBead(x, y);
         }
