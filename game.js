@@ -551,6 +551,7 @@ function resetGrid(){
     PS.glyphColor(PS.ALL, PS.ALL, PS.COLOR_WHITE);
     PS.fade(PS.ALL, PS.ALL, 0);
     PS.data(PS.ALL, PS.ALL, 0);
+    clearTimeout(G.hintTimer);
 }
 
 // All of the functions below MUST exist, or the engine will complain!
