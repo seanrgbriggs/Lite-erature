@@ -32,9 +32,9 @@ var G = (function () {
     var constants = {
         WIDTH: 20,
         HEIGHT: 20,
-        BG_COL: PS.COLOR_BLACK,
-        RIGHT_COL: PS.COLOR_YELLOW,
-        WRONG_COL: 255*65536+100*256+100,
+        BG_COLOR: PS.COLOR_BLACK,
+        RIGHT_COLOR: PS.COLOR_YELLOW,
+        WRONG_COLOR: 255*65536+100*256+100,
         PLAYAREA_COL: {r: 25, g: 25, b: 25},
 
         ALL_LETTERS: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
@@ -131,6 +131,31 @@ function initStartMenu() {
 
 }
 
+function levelSelectScreen(){
+    resetGrid();
+    G.screen = "levelselect";
+    var colOffset = 3;
+    var rowOffset = 3;
+    for(var level = 1; level <= 15; level++){
+        //print the 2 characters of every number
+        PS.glyph(colOffset, rowOffset, (level/10)%10+"");
+        PS.glyph(colOffset+1, rowOffset, level%10+"");
+        //data field is used to determine how it will look when hovered over
+        PS.data(colOffset, rowOffset, ["left", level]);
+        PS.data(colOffset+1, rowOffset, ["right", level]);
+
+        PS.borderColor(colOffset, rowOffset, PS.COLOR_YELLOW);
+        PS.borderColor(colOffset+1, rowOffset, PS.COLOR_YELLOW);
+
+        colOffset += 3;
+
+        if(colOffset === 18) {
+            colOffset = 3;
+            rowOffset += 3;
+        }
+    }
+}
+
 //initializes the cypher to be solved
 //letters above will be the cyphered text
 //black spaces below will contain the correct letter in their data field
@@ -145,7 +170,7 @@ function initCypher(){
     cyphered = cyphered.split(" ");
 
     var colOffset = 0;
-    var rowOffset = 0;
+    var rowOffset = 2;
     //go through every word in the string
     for(var i = 0; i < originalWords.length; i++){
         //move word to next line if it won't fit on current line
@@ -218,7 +243,7 @@ function updateCypher(letter){
 
     //go through the entire cypher
     var colOffset = 0;
-    var rowOffset = 1;
+    var rowOffset = 3;
     for(var i = 0; i < originalWords.length; i++){
         //move word to next line if it won't fit on current line
         if(colOffset + originalWords[i].length > G.constants.WIDTH){
@@ -271,7 +296,7 @@ function removeCypherLetter(){
 
     //go through the entire cypher
     var colOffset = 0;
-    var rowOffset = 1;
+    var rowOffset = 3;
     for(var i = 0; i < originalWords.length; i++){
 
         //move word to next line if it won't fit on current line
@@ -309,7 +334,7 @@ function checkCorrectness(){
 
     //go through the entire cypher
     var colOffset = 0;
-    var rowOffset = 1;
+    var rowOffset = 3;
     for(var i = 0; i < originalWords.length; i++){
 
         //move word to next line if it won't fit on current line
@@ -324,9 +349,9 @@ function checkCorrectness(){
             if(PS.color(colOffset, rowOffset) === PS.COLOR_WHITE && PS.glyph(colOffset, rowOffset) !== 0){
                 //if it's incorrect, mark it as such
                 if(String.fromCharCode(PS.glyph(colOffset, rowOffset)) !== PS.data(colOffset, rowOffset)){
-                    PS.color(colOffset, rowOffset, G.constants.WRONG_COL);
+                    PS.color(colOffset, rowOffset, G.constants.WRONG_COLOR);
                 }else{
-                    PS.color(colOffset, rowOffset, G.constants.RIGHT_COL)
+                    PS.color(colOffset, rowOffset, G.constants.RIGHT_COLOR)
                 }
             }
 
@@ -354,7 +379,7 @@ function checkCompletion(){
 
     //go through the entire cypher
     var colOffset = 0;
-    var rowOffset = 1;
+    var rowOffset = 3;
     for(var i = 0; i < originalWords.length; i++){
         //move word to next line if it won't fit on current line
         if(colOffset + originalWords[i].length > G.constants.WIDTH){
@@ -385,6 +410,7 @@ function checkCompletion(){
 
     if(correct){
         congratulate();
+        checkCorrectness();
     }
 }
 
@@ -449,7 +475,7 @@ function resetGrid(){
 PS.init = function (system, options) {
     //setup the grid
     PS.gridSize(G.constants.WIDTH, G.constants.HEIGHT);
-    PS.gridColor(G.constants.BG_COL);
+    PS.gridColor(G.constants.BG_COLOR);
     //initialize the cyphered text, all uppercase letters just in case also
     G.originalQuote = G.quotes.list[G.currentLevel].toUpperCase();
     G.difficulty = 1;
@@ -477,8 +503,7 @@ PS.touch = function (x, y, data, options) {
     if(G.screen === "start"){
         if(PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
             G.difficulty = PS.glyph(x, y) - 48;
-            G.screen = "play";
-            initCypher();
+            levelSelectScreen();
 
         }
     }
@@ -490,7 +515,7 @@ PS.touch = function (x, y, data, options) {
         initCypher();
     }
     else if(G.screen === "play"){
-        if (PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COL) {
+        if (PS.color(x, y) === PS.COLOR_WHITE || PS.color(x, y) === G.constants.WRONG_COLOR) {
             selectBead(x, y);
         }
         //else deselect the bead if there is one selected and clicking on an non input bead
@@ -539,7 +564,38 @@ PS.enter = function (x, y, data, options) {
     // Add code here for when the mouse cursor/touch enters a bead
     if(G.screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
         PS.border(x, y, 3);
-        PS.borderColor(x, y, G.constants.RIGHT_COL);
+        PS.borderColor(x, y, G.constants.RIGHT_COLOR);
+    }
+    else if(G.screen === "levelselect"){
+        //light up the numbers when hovered over
+        if(data[0] === "left"){
+            PS.border( x, y, {
+                top : 2,
+                left : 2,
+                bottom : 2,
+                right : 0
+            } );
+            PS.border( x+1, y, {
+                top : 2,
+                left : 0,
+                bottom : 2,
+                right : 2
+            } );
+        }
+        else if(data[0] === "right"){
+            PS.border( x-1, y, {
+                top : 2,
+                left : 2,
+                bottom : 2,
+                right : 0
+            } );
+            PS.border( x, y, {
+                top : 2,
+                left : 0,
+                bottom : 2,
+                right : 2
+            } );
+        }
     }
 };
 
@@ -558,6 +614,16 @@ PS.exit = function (x, y, data, options) {
     // Add code here for when the mouse cursor/touch exits a bead
     if(G.screen === "start" && PS.glyph(x, y) >= 49 && PS.glyph(x, y) <= 51){
         PS.border(x, y, 0);
+    }
+    if(G.screen === "levelselect"){
+        if(data[0] === "left"){
+            PS.border(x, y, 0);
+            PS.border(x+1, y, 0);
+        }
+        else if(data[0] === "right"){
+            PS.border(x-1, y, 0);
+            PS.border(x, y, 0);
+        }
     }
 };
 
