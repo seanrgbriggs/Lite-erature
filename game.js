@@ -43,6 +43,7 @@ var G = (function () {
     var originalQuote;
     var difficulty;
     var screen;
+    var hintTimer;
     var currentLevel = 0;
     var lm = new LetterMap();
     var selectedBead = {
@@ -105,6 +106,7 @@ var G = (function () {
     return {
         constants: constants,
         levelQuotes:levelQuotes,
+        hintTimer: hintTimer,
         quotes:quotes,
         lm:lm,
         currentLevel:currentLevel,
@@ -179,6 +181,7 @@ function initCypher(){
     G.lm = new G.LetterMap();
     resetGrid();
     G.screen = "play";
+    G.hintTimer = window.setTimeout(hint, 3000);
     if(G.currentLevel !== "infinite") {
         PS.statusText(G.levelQuotes[G.currentLevel][2]);
     }
@@ -249,6 +252,8 @@ function initCypher(){
 //update cypher with the new input data
 function updateCypher(letter){
     //place the new letter in the new spot
+    clearTimeout(G.hintTimer);
+    G.hintTimer = setTimeout(hint, 3000);
     if(G.selectedBead.x !== null) {
         PS.glyph(G.selectedBead.x, G.selectedBead.y, letter);
     }
@@ -267,6 +272,7 @@ function updateCypher(letter){
     var rowOffset = 3;
     for(var i = 0; i < originalWords.length; i++){
         //move word to next line if it won't fit on current line
+
         if(colOffset + originalWords[i].length > G.constants.WIDTH){
             colOffset = 0;
             rowOffset += 2;
@@ -431,6 +437,7 @@ function checkCompletion(){
     if(correct){
         congratulate();
         checkCorrectness();
+        clearTimeout(G.hintTimer);
     }
 }
 
@@ -441,6 +448,51 @@ function congratulate(){
     for(var i = 0; i < next.length; i++){
         PS.glyph(16+i, 0, next[i]);
         PS.borderColor(16+i, 0, PS.COLOR_YELLOW);
+    }
+}
+
+//prompts the player if they need a hint, usually starts after
+function hint(){
+    var hint = "HINT?";
+    for(var i = 0; i < hint.length; i++){
+        PS.glyph(i, G.constants.HEIGHT-1, hint[i]);
+        PS.borderColor(i, G.constants.HEIGHT-1, PS.COLOR_YELLOW);
+    }
+}
+
+function revealLetter(){
+    var originalWords = G.originalQuote.split(" ");
+
+    //go through the entire cypher
+    var colOffset = 0;
+    var rowOffset = 3;
+    for(var i = 0; i < originalWords.length; i++){
+        //move word to next line if it won't fit on current line
+        if(colOffset + originalWords[i].length > G.constants.WIDTH){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
+        for(var j = 0; j < originalWords[i].length; j++){
+            if(PS.color(colOffset, rowOffset) === PS.COLOR_WHITE){
+                //if it's incorrect, mark it as such
+                if(String.fromCharCode(PS.glyph(colOffset, rowOffset)) !== PS.data(colOffset, rowOffset)){
+                    updateCypher(PS.data(colOffset, rowOffset));
+                    return;
+                }
+            }
+
+            //increase the offset
+            colOffset++;
+        }
+
+        //add the space after words
+        colOffset++;
+        if(colOffset > G.constants.WIDTH-1){
+            colOffset = 0;
+            rowOffset += 2;
+        }
+
     }
 }
 
@@ -561,6 +613,9 @@ PS.touch = function (x, y, data, options) {
         //check button
         else if (x >= 15 && y === G.constants.HEIGHT-1 && PS.glyph(x,y) !== 0) {
             checkCorrectness();
+        }
+        else if(x === 0 && y === G.constants.HEIGHT-1){
+            revealLetter();
         }
     }
     else if(G.screen === "congrats"){
