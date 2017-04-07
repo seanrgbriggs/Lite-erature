@@ -57,7 +57,7 @@ var G = (function () {
         ["I took a deep breath and listened to the old brag of my heart; I am, I am, I am.", "TEIBHLGD", "3: Small Words are Your Friends"],
         ["It was the best of times, it was the worst of times.", "BEFEWORS", "4: Some Words Repeat"],
         ["To be, or not to be: that is the question", "THAQUN", "5: Small Word Repetition"],
-        ["Everything was terrifyingly complex; everything was terrifyingly simple.", "ING", "6: The Key to EverythING"],
+        ["Everything was terrifyingly complex; everything was terrifyingly simple.", "CXERING", "6: The Key to EverythING"],
         ["I don't know what's worse: to not know what you are and be happy, or to become what you've always wanted to be, and feel alone.", "S", "7: What Comes After Apostrophes?"],
         ["It is a far, far better thing that I do than I have ever done before; it is a far, far better rest that I go to, than I have ever known.","","8: A Review, in Short"],
         ["I cannot but conclude that the Bulk of your Natives, to be the most pernicious Race of little odious Vermin that Nature ever suffered to crawl upon the Surface of the Earth.","NF","9: Double Double"],
