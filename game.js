@@ -57,13 +57,33 @@ var G = (function () {
         ["I took a deep breath and listened to the old brag of my heart; I am, I am, I am.", "TEIBHLGD", "3: Small Words are Your Friends"],
         ["It was the best of times, it was the worst of times.", "BEFEWORS", "4: Some Words Repeat"],
         ["To be, or not to be: that is the question", "THAQUN", "5: Small Word Repetition"],
-        ["Everything was terrifyingly complex; everything was terrifyingly simple.", "ING"],
-        ["I don't know what's worse: to not know what you are and be happy, or to become what you've always wanted to be, and feel alone.", "", "7: What Comes After Apostrophes?"],
-        "It is a far, far better thing that I do than I have ever done before; it is a far, far better rest that I go to, than I have ever known."];
+        ["Everything was terrifyingly complex; everything was terrifyingly simple.", "ING", "6: The Key to EverythING"],
+        ["I don't know what's worse: to not know what you are and be happy, or to become what you've always wanted to be, and feel alone.", "S", "7: What Comes After Apostrophes?"],
+        ["It is a far, far better thing that I do than I have ever done before; it is a far, far better rest that I go to, than I have ever known.","","8: A Review, in Short"],
+        ["I cannot but conclude that the Bulk of your Natives, to be the most pernicious Race of little odious Vermin that Nature ever suffered to crawl upon the Surface of the Earth.","NF","9: Double Double"],
+        ["As Gregor Samsa awoke one morning from uneasy dreams he found himself transformed in his bed into a gigantic insect","GS","10: The Name Game"],
+        ["THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU.","","11: The Final 5: Part One"],
+        ["He's more myself than I am. Whatever our souls are made of, his and mine are the same","","12: The Final 5: Part Two"],
+        ["A woman, especially, if she have the misfortune of knowing anything, should conceal it as well as she can.","","13: The Final 5: Part Three"],
+        ["If an injury has to be done to a man it should be so severe that his vengeance need not be feared","","14: The Final 5: Part Four"],
+        ["He who fights with monsters might take care lest he thereby become a monster. And if you gaze for long into an abyss, the abyss gazes also into you.","","15: The Final 5: Part Five"]];
 
     var quotes = {list:(function() {
-        return ["THERE IS NO GREATER AGONY THAN BEARING AN UNTOLD STORY INSIDE YOU.",
-                "He who fights with monsters might take care lest he thereby become a monster. And if you gaze for long into an abyss, the abyss gazes also into you."];
+        return ["I have lived to see strange days.",
+                "He said something about punctuality being one of the minor virtues which we do not acquire until later in life.",
+                "Nothing contributes so much to tranquillize the mind as a steady purpose.",
+                "Honest people don't hide their deeds.",
+                "I like large parties. They're so intimate. At small parties there isn't any privacy.",
+                "So we drove on toward death through the cooling twilight. ",
+                "We may brave human laws, but we cannot resist natural ones.",
+                "Madness in great ones must not unwatch'd go",
+                "Treachery and violence are spears pointed at both ends; they wound those who resort to them worse than their enemies",
+                "Why, sometimes I've believed as many as six impossible things before breakfast",
+                "All animals are equal, but some animals are more equal than others.",
+                "Puns are the highest form of literature",
+                "Music expresses that which cannot be put into words and that which cannot remain silent",
+                "The person, be it gentleman or lady, who has not pleasure in a good novel, must be intolerably stupid",
+                "Outside of a dog, a book is man's best friend. Inside of a dog it's too dark to read"];
     })(),
     random:function () {
         return this.list[Math.floor(Math.random() * this.list.length)];
