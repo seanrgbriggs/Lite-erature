@@ -176,6 +176,7 @@ function levelSelectScreen(){
 //letters above will be the cyphered text
 //black spaces below will contain the correct letter in their data field
 function initCypher(){
+    G.lm = new G.LetterMap();
     resetGrid();
     G.screen = "play";
     if(G.currentLevel !== "infinite") {
