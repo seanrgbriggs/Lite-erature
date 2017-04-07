@@ -230,7 +230,6 @@ function initCypher(){
         PS.glyph(i, 0, back[i]);
         PS.borderColor(i, 0, PS.COLOR_YELLOW);
     }
-    PS.glyph(G.constants.WIDTH-1, G.constants.HEIGHT-1, "✓");
 }
 
 //update cypher with the new input data
@@ -380,7 +379,6 @@ function checkCorrectness(){
 }
 
 //function to check to see if the cypher is completely solved
-//TODO: check completion of the puzzle when prompted
 function checkCompletion(){
     var correct = true;
     var originalWords = G.originalQuote.split(" ");
@@ -539,7 +537,7 @@ PS.touch = function (x, y, data, options) {
             selectBead(G.selectedBead.x, G.selectedBead.y);
         }
         //check button
-        if (PS.glyph(x, y) === 10003) {
+        else if (x >= 15 && y === G.constants.HEIGHT-1 && PS.glyph(x,y) !== 0) {
             checkCorrectness();
         }
     }
@@ -625,11 +623,20 @@ PS.enter = function (x, y, data, options) {
         }
     }
     else if(G.screen === "play"){
+        //back button
         if(x < 4 && y === 0){
             PS.border(0, 0, {bottom : 2});
             PS.border(1, 0, {bottom : 2});
             PS.border(2, 0, {bottom : 2});
             PS.border(3, 0, {bottom : 2, right : 2});
+        }
+        //chack button
+        else if(x >= 15 && y === G.constants.HEIGHT-1 && PS.glyph(x, y) !== 0){
+            PS.border(15, G.constants.HEIGHT-1, {left : 2, top : 2});
+            PS.border(16, G.constants.HEIGHT-1, {top : 2});
+            PS.border(17, G.constants.HEIGHT-1, {top : 2});
+            PS.border(18, G.constants.HEIGHT-1, {top : 2});
+            PS.border(19, G.constants.HEIGHT-1, {top : 2});
         }
     }
     else if(G.screen === "congrats"){
@@ -684,6 +691,14 @@ PS.exit = function (x, y, data, options) {
             PS.border(2, 0, 0);
             PS.border(3, 0, 0);
         }
+        else if(x >= 15 && y === G.constants.HEIGHT-1){
+            PS.border(15, G.constants.HEIGHT-1, 0);
+            PS.border(16, G.constants.HEIGHT-1, 0);
+            PS.border(17, G.constants.HEIGHT-1, 0);
+            PS.border(18, G.constants.HEIGHT-1, 0);
+            PS.border(19, G.constants.HEIGHT-1, 0);
+        }
+
     }
     else if(G.screen === "congrats"){
         //back button
@@ -740,6 +755,11 @@ PS.keyDown = function (key, shift, ctrl, options) {
         }
         else {
             updateCypher(String.fromCharCode(key).toUpperCase());
+            var check = "CHECK";
+            for(var i = 0; i < check.length; i++) {
+                PS.glyph(15+i, G.constants.HEIGHT-1, check[i]);
+                PS.borderColor(15+i, G.constants.HEIGHT-1, PS.COLOR_YELLOW);
+            }
         }
     }
 };
