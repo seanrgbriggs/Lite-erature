@@ -488,11 +488,14 @@ function checkCompletion(){
 
 function congratulate(){
     G.screen = "congrats";
+    PS.audioPlay("fx_tada");
     PS.statusText("Congratulations!");
     var next = "NEXT";
     for(var i = 0; i < next.length; i++){
         PS.glyph(16+i, 0, next[i]);
-        PS.borderColor(16+i, 0, PS.COLOR_YELLOW);
+        PS.glyphColor(16+i, 0, PS.COLOR_BLACK);
+        PS.borderColor(16+i, 0, PS.COLOR_BLACK);
+        PS.color(16+i, 0, PS.COLOR_WHITE);
     }
 }
 
