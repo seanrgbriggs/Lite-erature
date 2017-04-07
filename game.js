@@ -675,11 +675,12 @@ PS.touch = function (x, y, data, options) {
         //next level button
         else if(x >= 16 && y == 0){
             //normal level mode
-            if(G.currentLevel !== "infinite") {
+            if(G.currentLevel !== "infinite" && G.currentLevel < 14) {
                 G.currentLevel++;
                 G.originalQuote = G.levelQuotes[G.currentLevel][0].toUpperCase();
             }
             else{
+                G.currentLevel = "infinite";
                 G.originalQuote = G.quotes.random().toUpperCase();
             }
             initCypher();
